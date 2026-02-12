@@ -1,6 +1,158 @@
 <mvc:View controllerName="zuimemberb20.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-    </Page>
+	xmlns:f="sap.f"
+	xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:t="sap.ui.table"
+    xmlns="sap.m"	
+    xmlns:core="sap.ui.core"
+	core:require="{TimeType: 'sap/ui/model/odata/type/Time'}">
+    <!-- xmlns:f="sap.f" -->
+    <f:DynamicPage id="idDynamicPage">
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <!-- xmlns:fb="sap.ui.comp.filterbar" -->
+                <fb:FilterBar id="filterbar" useToolbar="false" search="onSearch" >
+                    <fb:filterGroupItems>
+                        <fb:FilterGroupItem name="Name" label="Name" groupName="Group1" visibleInFilterBar="true">
+                            <fb:control>
+                                <Input id="idName" value=""/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+                        <fb:FilterGroupItem name="Erdat" label="Erdat" groupName="Group1" visibleInFilterBar="true">
+                            <fb:control>
+                                <DateRangeSelection
+                                        id="DRS1"
+                                        value= "{
+                                            'type': 'sap.ui.model.type.DateInterval',
+                                            'formatOptions': {
+                                                'pattern': 'yyyy/MM/dd'
+                                            },
+                                            'parts': [
+                                                {
+                                                    'type': 'sap.ui.model.type.Date',
+                                                    'path': '/erStart'
+                                                },
+                                                {
+                                                    'type': 'sap.ui.model.type.Date',
+                                                    'path': '/erEnd'
+                                                }
+                                            ]
+                                        }"
+                                        change="handleChange"/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+                        <fb:FilterGroupItem name="Aedat" label="Aedat" groupName="Group1" visibleInFilterBar="true">
+                            <fb:control>
+                                <DateRangeSelection
+                                        id="DRS2"
+                                        value= "{
+                                            'type': 'sap.ui.model.type.DateInterval',
+                                            'formatOptions': {
+                                                'pattern': 'yyyy/MM/dd'
+                                            },
+                                            'parts': [
+                                                {
+                                                    'type': 'sap.ui.model.type.Date',
+                                                    'path': '/aeStart'
+                                                },
+                                                {
+                                                    'type': 'sap.ui.model.type.Date',
+                                                    'path': '/aeEnd'
+                                                }
+                                            ]
+                                        }"
+                                        change="handleChange"/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+                    </fb:filterGroupItems>
+                </fb:FilterBar>
+            </f:DynamicPageHeader>
+        </f:header>
+        <f:content>
+            <t:Table
+                id="idTable"
+                class="sapUiSmallMargin"
+                rows="{view>/}"
+                selectionMode="Single"
+                selectionBehavior="RowOnly"
+                rowSelectionChange="onRowSelectionChange"
+                paste="onPaste"
+                ariaLabelledBy="title">
+                <t:extension>
+                    <OverflowToolbar>
+                        <Title id="title" text="ZGWMEMBER_B20_SRV"/>
+                        <ToolbarSpacer />
+                        <Button text="Entity" press="onReadEntity"/>
+                        <Button text="EntitySet" press="onReadEntitySet"/>
+                        <Button text="Create" press="onCreate"/>
+                        <!-- <Button text="Delete" press="onDelete"/> -->
+                    </OverflowToolbar>
+                </t:extension>
+                <t:columns>
+                    <t:Column>
+                        <Label text="Member ID" />
+                        <t:template>
+                            <Text text="{view>Id}"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="Name" />
+                        <t:template>
+                            <Text text="{view>Name}"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="Age" />
+                        <t:template>
+                            <Text text="{view>Age}"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="생성자" />
+                        <t:template>
+                            <Text text="{view>Ernam}"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="생성일자" />
+                        <t:template>
+                            <Text text="{
+                                path : 'view>Erdat',
+                                type : 'sap.ui.model.type.DateTime',
+                                formatOptions: { pattern : 'yyyy-MM-dd' }
+                            }"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="생성시간" />
+                        <t:template>
+                            <Text text="{path: 'view>Erzet', type: 'TimeType'}" />
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="변경자" />
+                        <t:template>
+                            <Text text="{view>Ernam}"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="변경일자" />
+                        <t:template>
+                            <Text text="{
+                                path : 'view>Erdat',
+                                type : 'sap.ui.model.type.DateTime',
+                                formatOptions: { pattern : 'yyyy-MM-dd' }
+                            }"/>
+                        </t:template>
+                    </t:Column>
+                    <t:Column>
+                        <Label text="변경시간" />
+                        <t:template>
+                            <Text text="{path: 'view>Aezet', type: 'TimeType'}" />
+                        </t:template>
+                    </t:Column>
+                </t:columns>
+            </t:Table>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>
