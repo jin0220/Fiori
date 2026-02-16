@@ -1,0 +1,37 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    	xmlns:f="sap.ui.layout.form">
+    <Dialog
+        id="idDialog"
+        title="Details">  
+        <content>
+            <VBox class="sapUiSmallMargin">
+		        <f:SimpleForm id="SimpleFormChange354">
+                    <Select id="idSelect" enabled="true">
+                        <core:Item key="update" text="Update" />
+                        <core:Item key="delete" text="Delete" />
+                    </Select>
+                    
+                    <Label text="Id" labelFor="id" />
+                    <Input id="id" value="{Detail>/Id}" />
+
+                    <Label text="Name" labelFor="name" />
+                    <Input id="name" value="{Detail>/Name}" />
+
+                    <Label text="Age" labelFor="age" />
+                    <Input id="age" value="{Detail>/Age}" />
+                </f:SimpleForm>
+            </VBox>
+        </content>
+
+        <beginButton>
+            <Button text="Save" press="onSave" />
+        </beginButton>
+        <endButton>
+            <Button text="Colse" press="onClose" />
+        </endButton>
+        
+    </Dialog>
+</core:FragmentDefinition>

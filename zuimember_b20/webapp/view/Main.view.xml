@@ -132,14 +132,14 @@
                     <t:Column>
                         <Label text="변경자" />
                         <t:template>
-                            <Text text="{view>Ernam}"/>
+                            <Text text="{view>Aenam}"/>
                         </t:template>
                     </t:Column>
                     <t:Column>
                         <Label text="변경일자" />
                         <t:template>
                             <Text text="{
-                                path : 'view>Erdat',
+                                path : 'view>Aedat',
                                 type : 'sap.ui.model.type.DateTime',
                                 formatOptions: { pattern : 'yyyy-MM-dd' }
                             }"/>
@@ -148,6 +148,7 @@
                     <t:Column>
                         <Label text="변경시간" />
                         <t:template>
+                        <!-- {path: 'view>Aezet', type: 'TimeType'} -->
                             <Text text="{path: 'view>Aezet', type: 'TimeType'}" />
                         </t:template>
                     </t:Column>
