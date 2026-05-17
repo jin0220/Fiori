@@ -1,0 +1,51 @@
+<c:FragmentDefinition 
+    xmlns="sap.m" 
+    xmlns:f="sap.ui.layout.form"
+    xmlns:c="sap.ui.core">
+    <Dialog id="idDialog" title="구매요청 생성" class="sapUiContentPadding" contentWidth="600px">
+        <content>
+            <f:SimpleForm id="idPRForm"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="4"
+                emptySpanXL="1" emptySpanL="1" emptySpanM="1" emptySpanS="1"
+                columnsXL="1" columnsL="1" columnsM="1">
+
+                <f:content>
+                    <Label id="lblMatnr" text="자재 코드" />
+                    <Text id="txtMatnr" text="{Popup>/Matnr}" />
+                    
+                    <Label id="lblMaktx" text="자재명" />
+                    <Text id="txtMaktx" text="{Popup>/Maktx}" />
+                    
+                    <Label id="lblWerks" text="플랜트" />
+                    <Text id="txtWerks" text="{Popup>/Werks}" />
+                    
+                    <Label id="lblLgort" text="창고" />
+                    <Text id="txtLgort" text="{Popup>/Lgort}" />
+                    
+                    <Label id="lblReqQty" text="제안 수량" />
+                    <HBox id="idQtyBox" alignItems="Center" displayInline="true">
+                        <Input id="idInputReqQty" value="{ReqQty}" type="Number" width="150px" />
+                        <Text id="txtUnit" text="L" class="sapUiTinyMarginBegin" />
+                    </HBox>
+                    
+                    <Label id="lblBadat" text="납기요청일" />
+                    <DatePicker 
+                        id="idDatePickerBadat" 
+                        value="{Badat}" 
+                        valueFormat="yyyy-MM-dd" 
+                        displayFormat="yyyy-MM-dd" 
+                        placeholder="e.g. 2026-12-31" 
+                        width="200px" />
+                    
+                </f:content>
+            </f:SimpleForm>
+        </content>
+
+        <buttons>
+            <Button id="btnSave" text="저장" type="Emphasized" press="onSavePR" />
+            <Button id="idClose" text="닫기" press="onClose" />
+        </buttons>
+    </Dialog>
+</c:FragmentDefinition>

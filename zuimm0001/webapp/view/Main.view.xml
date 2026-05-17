@@ -17,13 +17,26 @@
         
         <f:header>
             <f:DynamicPageHeader id="pageHeader">
-                <fb:FilterBar id="stockFilterBar" search="onSearch" showFilterConfiguration="false">
+                <fb:FilterBar id="filterbar" persistencyKey="myPersKey" useToolbar="false" search=".onSearch" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
                     <fb:filterGroupItems>
-                        <fb:FilterGroupItem id="filterGroupPlant" groupName="G1" name="Plant" label="플랜트">
+                        <fb:FilterGroupItem id="filterGroupMatnr" groupName="G1" name="Matnr" label="자재코드" visibleInFilterBar="true">
                             <fb:control>
-                                <ComboBox id="idPlant"/>
+                                <ComboBox id="idMatnr"/>
                             </fb:control>
                         </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem id="filterGroupWerks" groupName="G1" name="Werks" label="플랜트" visibleInFilterBar="true">
+                            <fb:control>
+                                <ComboBox id="idWerks"/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem id="filterGroupLgort" groupName="G1" name="Lgort" label="창고" visibleInFilterBar="true">
+                            <fb:control>
+                                <ComboBox id="idLgort"/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
                     </fb:filterGroupItems>
                 </fb:FilterBar>
             </f:DynamicPageHeader>
@@ -31,7 +44,7 @@
 
         <!-- RadialMicroChart를 활용한 셀 내 시각화 -->
         <f:content>
-            <Table id="idStockTable" items="{/MStockSet}">
+            <Table id="idStockTable" items="{/MStockSet}" itemPress="onItemSelect">
                 <columns>
                 <!-- 자재번호, 자재명, 플랜트, 창고, 저장위치, 가용재고, 입고예정 수량(PO), 안전재고, 스토리지빈 저장 수량(실 재고량 계산) -->
                     <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
@@ -48,7 +61,7 @@
                 </columns>
                 
                 <items>
-                    <ColumnListItem id="idRowItem" highlight="{= ${Labst} &lt; ${Eisbe} ? 'Error' : 'None' }">
+                    <ColumnListItem id="idRowItem" type="Active" highlight="{= ${Labst} &lt; ${Eisbe} ? 'Error' : 'None' }">
                         <cells>
                             <Text id="idTextMatnr" text="{Matnr}"/>
                             <Text id="idTextMaktx" text="{Maktx}"/>
@@ -61,7 +74,7 @@
                             <Text id="idTextEisbe" text="{Eisbe}"/>
                             
                             <VBox id="idVBoxChart">
-                                <!-- <Title id="idTitleTarget" text="{TargetStock} L" titleStyle="H6"/> -->
+                                <!-- <Tit le id="idTitleTarget" text="{TargetStock} L" titleStyle="H6"/> -->
                                 <!-- <micro:RadialMicroChart 
                                     id="idRadialChart"
                                     size="XS" 
