@@ -3,6 +3,9 @@
     xmlns:f="sap.f"
     xmlns:fb="sap.ui.comp.filterbar"
     xmlns:micro="sap.suite.ui.microchart"
+    xmlns:form="sap.ui.comp.smartform"
+    xmlns:sf="sap.ui.comp.smartfield"
+    xmlns:mdc="sap.ui.mdc"
     xmlns="sap.m">
     
     <f:DynamicPage id="page" headerExpanded="true">
@@ -27,13 +30,13 @@
 
                         <fb:FilterGroupItem id="filterGroupWerks" groupName="G1" name="Werks" label="플랜트" visibleInFilterBar="true">
                             <fb:control>
-                                <ComboBox id="idWerks"/>
+                                <Input id="idWerks" showValueHelp="true" valueHelpRequest="onValueHelpRequest" />
                             </fb:control>
                         </fb:FilterGroupItem>
 
                         <fb:FilterGroupItem id="filterGroupLgort" groupName="G1" name="Lgort" label="창고" visibleInFilterBar="true">
                             <fb:control>
-                                <ComboBox id="idLgort"/>
+                                <Input id="idLgort" showValueHelp="true" valueHelpRequest="onValueHelpRequestLgort" />
                             </fb:control>
                         </fb:FilterGroupItem>
 
@@ -53,51 +56,37 @@
                     <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
                     <Column id="colLgpla"><Text id="txtColLgpla" text="저장위치"/></Column>
                     <Column id="colLabst"><Text id="txtColLabst" text="가용재고"/></Column>
-                    <!-- <Column id="colPRCnt"><Text id="txtColPRCnt" text="PR수량"/></Column> -->
-                    <Column id="colPOCnt"><Text id="txtColPOCnt" text="입고예정 수량"/></Column>
+                    <Column id="colResqu"><Text id="txtColResqu" text="입고예정 수량"/></Column>
                     <Column id="colEisbe"><Text id="txtColEisbe" text="안전재고"/></Column>
                     <Column id="colLack"><Text id="txtColLack" text="실 재고량"/></Column>
                     <Column id="colTotal"><Text id="txtColTotal" text="확보 재고량"/></Column>
                 </columns>
                 
                 <items>
-                    <ColumnListItem id="idRowItem" type="Active" highlight="{= ${Labst} &lt; ${Eisbe} ? 'Error' : 'None' }">
+                    <ColumnListItem id="idRowItem" type="Active" highlight="{= Number(${Labst}) &lt; Number(${Eisbe}) ? 'Error' : 'None' }">
                         <cells>
                             <Text id="idTextMatnr" text="{Matnr}"/>
                             <Text id="idTextMaktx" text="{Maktx}"/>
                             <Text id="idTextWerks" text="{Werks}"/>
                             <Text id="idTextLgort" text="{Lgort}"/>
                             <Text id="idTextLgpla" text="{Lgpla}"/>
-                            <Text id="idTextLabst" text="{Labst}"/>
-                            <!-- <Text id="idTextPRCnt" text="{Prcnt}"/> -->
-                            <Text id="idTextPOCnt" text="{Pocnt}"/>
+                            <Text id="idTextLabst" text="{path: 'Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
+                            <Text id="idTextResqu" text="{path: 'Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
                             <Text id="idTextEisbe" text="{Eisbe}"/>
                             
                             <VBox id="idVBoxChart">
-                                <!-- <Tit le id="idTitleTarget" text="{TargetStock} L" titleStyle="H6"/> -->
-                                <!-- <micro:RadialMicroChart 
-                                    id="idRadialChart"
-                                    size="XS" 
-                                    percentage="{Percent}" 
-                                    valueColor="{= ${Percent} &lt; 50 ? 'Error' : 'Good' }" /> -->
-                                    <micro:RadialMicroChart id="idRadialChart" size="M" percentage="45" press=".press" />
+                                <micro:RadialMicroChart id="idRadialChart" 
+                                                        size="M" 
+                                                        press=".press"
+                                                        percentage="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 }"/>
                             </VBox>
 
                             <VBox id="idVBoxChart02">
-                                <!-- <Title id="idTitleTarget" text="{TargetStock} L" titleStyle="H6"/> -->
-                                <!-- <micro:RadialMicroChart 
-                                    id="idRadialChart"
-                                    size="XS" 
-                                    percentage="{Percent}" 
-                                    valueColor="{= ${Percent} &lt; 50 ? 'Error' : 'Good' }" /> -->
-                                    <micro:RadialMicroChart id="idRadialChart02" size="M" percentage="45" press=".press" />
+                                <micro:RadialMicroChart id="idRadialChart02" 
+                                                        size="M" 
+                                                        press=".press"
+                                                        percentage="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 }"/>
                             </VBox>
-                            
-                            <!-- <ObjectNumber 
-                                id="idObjNumTotal"
-                                number="{TotalStock}" 
-                                unit="L" 
-                                state="{= ${TotalStock} &lt; 5000 ? 'Error' : 'Success' }"/> -->
                         </cells>
                     </ColumnListItem>
                 </items>

@@ -1,0 +1,33 @@
+<core:FragmentDefinition
+    xmlns="sap.ui.comp.valuehelpdialog"
+    xmlns:m="sap.m"
+    xmlns:table="sap.ui.table"
+    xmlns:core="sap.ui.core">
+    <ValueHelpDialog
+        id="idLgortHelpDialog"
+        title="창고 선택 (Transport Delivery)"
+        ok=".onConfirmLgort"
+        cancel=".onCloseLgort"
+        key="LgortId"
+        descriptionKey="Werks">
+        
+        <m:VBox>
+            <m:SearchField id="idSearchLgort" search=".onSearchLgort" placeholder="검색어를 입력하세요..." />
+        </m:VBox>
+
+        <table:Table id="idLgortTable" rows="{/LgortSet}" selectionMode="Single">
+            <table:columns>
+                <table:Column template="Werks">
+                    <m:Label text="플랜트번호" />
+                </table:Column>
+                <table:Column template="LgortId">
+                    <m:Label text="창고번호" />
+                </table:Column>
+                <table:Column template="Adrnr">
+                    <m:Label text="창고명" />
+                </table:Column>
+            </table:columns>
+        </table:Table>
+
+    </ValueHelpDialog>
+</core:FragmentDefinition>

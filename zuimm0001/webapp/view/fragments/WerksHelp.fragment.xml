@@ -1,0 +1,16 @@
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core">
+    <SelectDialog
+        id="idWerksHelpDialog"
+        title="플랜트 선택"
+        noDataText="조회된 플랜트가 없습니다"
+        search=".onSearchWerks"
+        confirm=".onConfirmWerks"
+        items="{/WerksSet}"> 
+        <StandardListItem
+            title="{WerksId}" 
+            description="{Name1}" 
+            type="Active" />
+    </SelectDialog>
+</c:FragmentDefinition>
