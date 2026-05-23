@@ -1,16 +1,26 @@
 <c:FragmentDefinition
     xmlns="sap.m"
     xmlns:c="sap.ui.core">
-    <SelectDialog
+    <TableSelectDialog
         id="idWerksHelpDialog"
         title="플랜트 선택"
         noDataText="조회된 플랜트가 없습니다"
         search=".onSearchWerks"
         confirm=".onConfirmWerks"
+        cancel=".onCloseHelp"
         items="{/WerksSet}"> 
-        <StandardListItem
-            title="{WerksId}" 
-            description="{Name1}" 
-            type="Active" />
-    </SelectDialog>
+        
+        <columns>
+            <Column><header><Label text="플랜트번호" /></header></Column>
+            <Column><header><Label text="플랜트명" /></header></Column>
+        </columns>
+
+        <ColumnListItem vAlign="Middle">
+            <cells>
+                <Text text="{WerksId}" />
+                <Text text="{Name1}" />
+            </cells>
+        </ColumnListItem>
+        
+    </TableSelectDialog>
 </c:FragmentDefinition>

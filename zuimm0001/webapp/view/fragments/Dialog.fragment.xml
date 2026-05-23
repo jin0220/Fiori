@@ -27,7 +27,7 @@
                     <Label id="lblReqQty" text="제안 수량" />
                     <HBox id="idQtyBox" alignItems="Center" displayInline="true">
                         <Input id="idInputReqQty" value="{ReqQty}" type="Number" width="150px" />
-                        <Text id="txtUnit" text="L" class="sapUiTinyMarginBegin" />
+                        <!-- <Text id="txtUnit" text="L" class="sapUiTinyMarginBegin" /> -->
                     </HBox>
                     
                     <Label id="lblBadat" text="납기요청일" />

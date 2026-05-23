@@ -3,9 +3,9 @@
     xmlns:f="sap.f"
     xmlns:fb="sap.ui.comp.filterbar"
     xmlns:micro="sap.suite.ui.microchart"
-    xmlns:form="sap.ui.comp.smartform"
-    xmlns:sf="sap.ui.comp.smartfield"
-    xmlns:mdc="sap.ui.mdc"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns="sap.m">
     
     <f:DynamicPage id="page" headerExpanded="true">
@@ -30,67 +30,116 @@
 
                         <fb:FilterGroupItem id="filterGroupWerks" groupName="G1" name="Werks" label="플랜트" visibleInFilterBar="true">
                             <fb:control>
-                                <Input id="idWerks" showValueHelp="true" valueHelpRequest="onValueHelpRequest" />
+                                <Input id="idWerks" showValueHelp="true" valueHelpRequest=".onValueHelpRequest" />
                             </fb:control>
                         </fb:FilterGroupItem>
 
                         <fb:FilterGroupItem id="filterGroupLgort" groupName="G1" name="Lgort" label="창고" visibleInFilterBar="true">
                             <fb:control>
-                                <Input id="idLgort" showValueHelp="true" valueHelpRequest="onValueHelpRequestLgort" />
+                                <Input id="idLgort" showValueHelp="true" valueHelpRequest=".onValueHelpRequestLgort" />
                             </fb:control>
                         </fb:FilterGroupItem>
-
                     </fb:filterGroupItems>
                 </fb:FilterBar>
             </f:DynamicPageHeader>
         </f:header>
 
-        <!-- RadialMicroChart를 활용한 셀 내 시각화 -->
         <f:content>
-            <Table id="idStockTable" items="{/MStockSet}" itemPress="onItemSelect">
-                <columns>
-                <!-- 자재번호, 자재명, 플랜트, 창고, 저장위치, 가용재고, 입고예정 수량(PO), 안전재고, 스토리지빈 저장 수량(실 재고량 계산) -->
-                    <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
-                    <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
-                    <Column id="colWerks"><Text id="txtColWerks" text="플랜트"/></Column>
-                    <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
-                    <Column id="colLgpla"><Text id="txtColLgpla" text="저장위치"/></Column>
-                    <Column id="colLabst"><Text id="txtColLabst" text="가용재고"/></Column>
-                    <Column id="colResqu"><Text id="txtColResqu" text="입고예정 수량"/></Column>
-                    <Column id="colEisbe"><Text id="txtColEisbe" text="안전재고"/></Column>
-                    <Column id="colLack"><Text id="txtColLack" text="실 재고량"/></Column>
-                    <Column id="colTotal"><Text id="txtColTotal" text="확보 재고량"/></Column>
-                </columns>
+            <VBox id="idContentWrapper">
                 
-                <items>
-                    <ColumnListItem id="idRowItem" type="Active" highlight="{= Number(${Labst}) &lt; Number(${Eisbe}) ? 'Error' : 'None' }">
-                        <cells>
-                            <Text id="idTextMatnr" text="{Matnr}"/>
-                            <Text id="idTextMaktx" text="{Maktx}"/>
-                            <Text id="idTextWerks" text="{Werks}"/>
-                            <Text id="idTextLgort" text="{Lgort}"/>
-                            <Text id="idTextLgpla" text="{Lgpla}"/>
-                            <Text id="idTextLabst" text="{path: 'Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
-                            <Text id="idTextResqu" text="{path: 'Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
-                            <Text id="idTextEisbe" text="{Eisbe}"/>
-                            
-                            <VBox id="idVBoxChart">
-                                <micro:RadialMicroChart id="idRadialChart" 
-                                                        size="M" 
-                                                        press=".press"
-                                                        percentage="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 }"/>
-                            </VBox>
+                <Panel id="idChartPanel" expandable="false">
+                    <viz:VizFrame id="idStockChart" 
+                                  vizType="bar" 
+                                  selectData=".onSelectChartSlice" 
+                                  width="100%" 
+                                  height="250px"
+                                  vizProperties="{
+                                    'valueAxis': {
+                                        'label': {
+                                            'formatString': '#,##0'
+                                        },
+                                        'scale': {
+                                            'fixedRange': true,
+                                            'minValue': 0,
+                                            'maxValue': 20,
+                                            'minMajorUnit': 5
+                                        }
+                                    },
+                                    'plotArea': {
+                                        'title': {
+                                            'visible': false
+                                        }
+                                    },
+                                    title: {
+                                        visible: true,
+                                        text: '창고별 부족 자재 건수'
+                                    }
+                                }">
+                        <viz:dataset>
+                            <viz.data:FlattenedDataset data="{ChartModel>/Issues}"> 
+                                <viz.data:dimensions>
+                                    <viz.data:DimensionDefinition name="플랜트" value="{Werks}" /> 
+                                    <viz.data:DimensionDefinition name="창고" value="{Lgort}" />
+                                </viz.data:dimensions>
+                                <viz.data:measures>
+                                    <viz.data:MeasureDefinition name="부족한 자재 건수" value="{Count}" />
+                                </viz.data:measures>
+                            </viz.data:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="부족한 자재 건수" />
+                            <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="플랜트,창고" />
+                        </viz:feeds>
+                    </viz:VizFrame>
+                </Panel>
 
-                            <VBox id="idVBoxChart02">
-                                <micro:RadialMicroChart id="idRadialChart02" 
-                                                        size="M" 
-                                                        press=".press"
-                                                        percentage="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 }"/>
-                            </VBox>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
+                <Table id="idStockTable" items="{/MStockSet}" itemPress=".onItemSelect">
+                    <columns>
+                        <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
+                        <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
+                        <Column id="colWerks"><Text id="txtColWerks" text="플랜트"/></Column>
+                        <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
+                        <Column id="colLgpla"><Text id="txtColLgpla" text="저장위치"/></Column>
+                        <Column id="colLabst"><Text id="txtColLabst" text="가용재고"/></Column>
+                        <Column id="colResqu"><Text id="txtColResqu" text="입고예정 수량"/></Column>
+                        <Column id="colEisbe"><Text id="txtColEisbe" text="안전재고"/></Column>
+                        <Column id="colLack" width="10rem"><Text id="txtColLack" text="창고 점유율 (현재)"/></Column> <!-- 어느정도 저장할 수 있는지 -->
+                        <Column id="colTotal" width="10rem"><Text id="txtColTotal" text="창고 점유율 (입고포함)"/></Column>
+                    </columns>
+                    
+                    <items>
+                        <ColumnListItem id="idRowItem" type="Active" highlight="{= Number(${Labst}) &lt; Number(${Eisbe}) ? 'Error' : 'None' }">
+                            <cells>
+                                <Text id="idTextMatnr" text="{Matnr}"/>
+                                <Text id="idTextMaktx" text="{Maktx}"/>
+                                <Text id="idTextWerks" text="{Werks}"/>
+                                <Text id="idTextLgort" text="{Lgort}"/>
+                                <Text id="idTextLgpla" text="{Lgpla}"/>
+                                <Text id="idTextLabst" text="{path: 'Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
+                                <Text id="idTextResqu" text="{path: 'Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
+                                <Text id="idTextEisbe" text="{Eisbe}"/>
+                                
+                                <VBox id="idVBoxChart">
+                                    <micro:RadialMicroChart id="idRadialChart" 
+                                                            size="M" 
+                                                            press=".press"
+                                                            percentage="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 }"
+                                                            valueColor="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/>
+                                </VBox>
+
+                                <VBox id="idVBoxChart02">
+                                    <micro:RadialMicroChart id="idRadialChart02" 
+                                                            size="M" 
+                                                            press=".press"
+                                                            percentage="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 }"
+                                                            valueColor="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/>
+                                </VBox>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+                
+            </VBox>
         </f:content>
         
     </f:DynamicPage>
