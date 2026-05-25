@@ -1,8 +1,10 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
-    "sap/ui/model/json/JSONModel"
-], (Controller, Fragment, JSONModel) => {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], (Controller, Fragment, JSONModel, Filter, FilterOperator) => {
     "use strict";
 
     return Controller.extend("zuimm0001.controller.Main", {
@@ -52,6 +54,106 @@ sap.ui.define([
         },
         onClose() {
             sap.ui.getCore().byId("idDialog").close();
+        },
+        // =======================================================
+        // 🌟 1. 제안 기능 (Input 타이핑 시 자동완성 필터링)
+        // =======================================================
+        onSuggestMatnr: function (oEvent) {
+            // eslint-disable-next-line no-console
+            console.log("onSuggestMatnr 실행됨");
+            let sValue = oEvent.getParameter("suggestValue");
+            let aFilters = [];
+
+            if (sValue) {
+                // 자재코드(Matnr)나 자재명(Maktx) 둘 중 하나라도 포함(Contains)되면 보여줌
+                aFilters = [
+                    new Filter({
+                        filters: [
+                            new Filter("Matnr", FilterOperator.Contains, sValue),
+                            new Filter("Maktx", FilterOperator.Contains, sValue)
+                        ],
+                        and: false 
+                    })
+                ];
+            }
+
+            // Input 필드의 suggestionItems 바인딩에 필터 적용
+            let oInput = oEvent.getSource();
+            let oBinding = oInput.getBinding("suggestionItems");
+            if (oBinding) {
+                oBinding.filter(aFilters);
+            }
+        },
+        onValueHelpMatnr: function () {
+            // eslint-disable-next-line no-console
+            console.log("onValueHelpMatnr 실행됨");
+            let oMatnrDialog = sap.ui.getCore().byId("idMatnrHelpDialog");
+
+            let aUniqueMaterials = []; // 중복 제거된 자재 데이터를 담을 배열
+            if (oMatnrDialog) {
+                oMatnrDialog.open();
+            } else {
+                this._oModel.read("/MStockSet", {
+                            //urlParameters: { "$top": 200 }, 
+                    success: function (oData) {
+                        let aResults = oData.results; // 백엔드에서 넘어온 순수 배열 데이터
+
+                        // 🌟 3. 가져온 데이터에서 자재코드(Matnr) 기준으로 중복 제거
+                        aUniqueMaterials = aResults.filter((item, index, self) =>
+                            index === self.findIndex((t) => t.Matnr === item.Matnr)
+                        );
+
+                        Fragment.load({
+                            name: "zuimm0001.view.fragments.MatnrHelp",
+                            type: "XML",
+                            controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
+                        }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
+                            oLoadedDialog.setModel(new JSONModel(aUniqueMaterials), "MaterialHelp");
+                            oLoadedDialog.open();
+                        });
+                    }.bind(this),
+                    error: function (oError) {
+                        // eslint-disable-next-line no-console
+                        console.error("자재 재고 데이터 조회 실패:", oError);
+                    }
+                });
+            }
+        },
+
+        // 🌟 팝업창 안에서 검색창(FilterBar) 엔터 쳤을 때
+        onSearchMatnrPopup: function (oEvent) {
+            // eslint-disable-next-line no-console
+            console.log("onSearchMatnrPopup 실행됨");
+            let sValue = oEvent.getParameter("value");
+            let oBinding = oEvent.getSource().getBinding("items");
+            let aFilters = [];
+
+            if (sValue) {
+                aFilters = [
+                    new Filter({
+                        filters: [
+                            new Filter("Matnr", FilterOperator.Contains, sValue),
+                            new Filter("Maktx", FilterOperator.Contains, sValue)
+                        ],
+                        and: false
+                    })
+                ];
+            }
+            oBinding.filter(aFilters);
+        },
+
+        // 🌟 팝업창에서 자재를 선택(OK) 했을 때
+        onConfirmMatnr: function (oEvent) {
+            // eslint-disable-next-line no-console
+            console.log("onConfirmMatnr 실행됨");
+            let oSelectedItem = oEvent.getParameter("selectedItem");
+            let oInput = this.byId("idMatnr"); // 메인 화면 Input ID
+
+            if (oSelectedItem) {
+                // 선택한 행의 자재코드를 쏙 빼옵니다
+                let sSelectedMatnr = oSelectedItem.getBindingContext("MaterialHelp").getProperty("Matnr");
+                oInput.setValue(sSelectedMatnr);
+            }
         },
         onValueHelpRequest() {
             var oView = this.getView();
