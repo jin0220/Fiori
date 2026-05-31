@@ -8,7 +8,7 @@
         search=".onSearchLgort"
         confirm=".onConfirmLgort"
         cancel=".onCloseHelp"
-        items="{/LgortSet}"> 
+        items="{LgortSet>/}"> 
         
         <columns>
             <Column><header><Label text="플랜트번호" /></header></Column>
@@ -18,9 +18,9 @@
 
         <ColumnListItem vAlign="Middle">
             <cells>
-                <Text text="{Werks}" />
-                <Text text="{LgortId}" />
-                <Text text="{Adrnr}" />
+                <Text text="{LgortSet>Werks}" />
+                <Text text="{LgortSet>LgortId}" />
+                <Text text="{LgortSet>Adrnr}" />
             </cells>
         </ColumnListItem>
         

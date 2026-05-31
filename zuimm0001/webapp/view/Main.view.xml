@@ -32,12 +32,13 @@
                                     valueHelpRequest=".onValueHelpMatnr"
                                     showSuggestion="true"
                                     suggest=".onSuggestMatnr"
-                                    suggestionItems="{/MaterialSet}"> 
+                                    suggestionItems="{MaterialSet>/}"
+                                    filterSuggests="false">
                                     <suggestionItems>
                                         <core:ListItem 
-                                            key="{Matnr}" 
-                                            text="{Matnr}" 
-                                            additionalText="{Maktx}" />
+                                            key="{MaterialSet>Matnr}" 
+                                            text="{MaterialSet>Matnr}" 
+                                            additionalText="{MaterialSet>Maktx}" />
                                     </suggestionItems>
                                 </Input>
                             </fb:control>
@@ -108,7 +109,7 @@
                     </viz:VizFrame>
                 </Panel>
 
-                <Table id="idStockTable" items="{/MStockSet}" itemPress=".onItemSelect">
+                <Table id="idStockTable" items="{MStockSet>/}" itemPress=".onItemSelect">
                     <columns>
                         <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
                         <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
@@ -123,31 +124,31 @@
                     </columns>
                     
                     <items>
-                        <ColumnListItem id="idRowItem" type="Active" highlight="{= Number(${Labst}) &lt; Number(${Eisbe}) ? 'Error' : 'None' }">
+                        <ColumnListItem id="idRowItem" type="Active" highlight="{= Number(${MStockSet>Labst}) &lt; Number(${MStockSet>Eisbe}) ? 'Error' : 'None' }">
                             <cells>
-                                <Text id="idTextMatnr" text="{Matnr}"/>
-                                <Text id="idTextMaktx" text="{Maktx}"/>
-                                <Text id="idTextWerks" text="{Werks}"/>
-                                <Text id="idTextLgort" text="{Lgort}"/>
-                                <Text id="idTextLgpla" text="{Lgpla}"/>
-                                <Text id="idTextLabst" text="{path: 'Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
-                                <Text id="idTextResqu" text="{path: 'Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
-                                <Text id="idTextEisbe" text="{Eisbe}"/>
+                                <Text id="idTextMatnr" text="{MStockSet>Matnr}"/>
+                                <Text id="idTextMaktx" text="{MStockSet>Maktx}"/>
+                                <Text id="idTextWerks" text="{MStockSet>Werks}"/>
+                                <Text id="idTextLgort" text="{MStockSet>Lgort}"/>
+                                <Text id="idTextLgpla" text="{MStockSet>Lgpla}"/>
+                                <Text id="idTextLabst" text="{path: 'MStockSet>Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
+                                <Text id="idTextResqu" text="{path: 'MStockSet>Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
+                                <Text id="idTextEisbe" text="{MStockSet>Eisbe}"/>
                                 
                                 <VBox id="idVBoxChart">
                                     <micro:RadialMicroChart id="idRadialChart" 
                                                             size="M" 
                                                             press=".press"
-                                                            percentage="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 }"
-                                                            valueColor="{= ( Number(${Labst}) / Number(${Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/>
+                                                            percentage="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 }"
+                                                            valueColor="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/>
                                 </VBox>
 
                                 <VBox id="idVBoxChart02">
                                     <micro:RadialMicroChart id="idRadialChart02" 
                                                             size="M" 
                                                             press=".press"
-                                                            percentage="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 }"
-                                                            valueColor="{= ((Number(${Labst}) + Number(${Resqu})) / Number(${Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/>
+                                                            percentage="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 }"
+                                                            valueColor="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/>
                                 </VBox>
                             </cells>
                         </ColumnListItem>
