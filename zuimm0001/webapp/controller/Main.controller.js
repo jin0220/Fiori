@@ -20,7 +20,7 @@ sap.ui.define([
                     let oJSONModelMain = new JSONModel(aResults);
                     this.getView().setModel(oJSONModelMain, "MStockSet");
 
-                    this._updateChartData()
+                    this._updateChartData();
 
                     let aUniqueMaterials = aResults.filter((item, index, self) =>
                         index === self.findIndex((t) => t.Matnr === item.Matnr)
@@ -49,25 +49,14 @@ sap.ui.define([
                 }
             });
         },
-        // onAfterRendering: function () {
-        //     var oTable = this.byId("idStockTable");
-        //     var oBinding = oTable.getBinding("items");
-
-        //     if (oBinding) {
-        //         // 이미 데이터가 있다면 즉시 차트를 그리고,
-        //         this._updateChartData();
-
-        //         // 혹시 비동기로 데이터가 늦게 도착할 상황을 대비해 안전하게 센서를 한 번 더 달아둡니다.
-        //         oBinding.attachEvent("change", function () {
-        //             this._updateChartData();
-        //         }.bind(this));
-        //     }
-        // },
         onItemSelect(oEvent) {
             let oListItem = oEvent.getParameter("listItem"); // 클릭한 아이템의 데이터 
             let sPath = oListItem.getBindingContext("MStockSet").getPath();
             let oData = this.getView().getModel("MStockSet").getProperty(sPath);
 
+            if (oData.Matnr.substr(0, 2) !== "RM") { // 원자재만 구매요청 가능하도록 조건 걸기 (자재코드가 "RM"으로 시작하는 경우만)
+                return;
+            }
             //============================================================================
             // 구매요청 생성 팝업
             //============================================================================
@@ -84,7 +73,6 @@ sap.ui.define([
                 let oBsartModel = new JSONModel(oBsartData);
 
                 if (oDialog) { // 있으면 true, 없으면 undefined가 리턴됨.
-                    oDialog.setModel(new JSONModel(oData), "Popup");
                     oDialog.open();
 
                 }
@@ -100,7 +88,7 @@ sap.ui.define([
                         oLoadedDialog.open();
                     });
                 }
-            }
+            };
 
             //============================================================================
             // 가용 재고가 충분한 경우 구매요청 생성 전 알림창을 띄워 요청생성 여부를 다시 확인
@@ -122,6 +110,32 @@ sap.ui.define([
                     }
                 });
             }
+        },
+        onSavePR() {
+            let matnr = sap.ui.getCore().byId("txtMatnr").getText();
+            let werks = sap.ui.getCore().byId("txtWerks").getText();
+            let lgort = sap.ui.getCore().byId("txtLgort").getText();
+            let bsart = sap.ui.getCore().byId("idComboBsart").getSelectedKey();
+            let menge = sap.ui.getCore().byId("idInputReqQty").getValue();
+            let lfdat = sap.ui.getCore().byId("idDatePickerBadat").getDateValue(); // 오늘 날짜 (YYYY-MM-DD)
+
+            this._oModel.create("/PRSet", {
+                Matnr: matnr,  
+                Werks: werks,
+                Lgort: lgort,
+                Bsart: bsart,
+                Menge: menge,
+                Lfdat: lfdat
+            }, {
+                success: () => {
+                    sap.m.MessageToast.show("구매요청이 생성되었습니다.");
+                    this.onClose();
+                },
+                error: (oError) => {
+                    console.error("구매요청 생성 실패: ", oError);
+                    sap.m.MessageBox.error("구매요청 생성에 실패했습니다. 다시 시도해주세요.");
+                }
+            });
         },
         onClose() {
             sap.ui.getCore().byId("idDialog").close();
@@ -153,11 +167,8 @@ sap.ui.define([
             }
         },
         onValueHelpMatnr: function () {
-            // eslint-disable-next-line no-console
-            console.log("onValueHelpMatnr 실행됨");
             let oMatnrDialog = sap.ui.getCore().byId("idMatnrHelpDialog");
 
-            // let aUniqueMaterials = []; // 중복 제거된 자재 데이터를 담을 배열
             if (oMatnrDialog) {
                 oMatnrDialog.open();
             } else {
@@ -166,7 +177,6 @@ sap.ui.define([
                     type: "XML",
                     controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
                 }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
-                    // oView.addDependent(oLoadedDialog);
                     oLoadedDialog.setModel(new JSONModel(this._aUniqueMaterials), "MaterialHelp");
                     oLoadedDialog.open();
                 }.bind(this));
@@ -175,8 +185,6 @@ sap.ui.define([
 
         // 🌟 팝업창 안에서 검색창(FilterBar) 엔터 쳤을 때
         onSearchMatnrPopup: function (oEvent) {
-            // eslint-disable-next-line no-console
-            console.log("onSearchMatnrPopup 실행됨");
             let sValue = oEvent.getParameter("value");
             let oBinding = oEvent.getSource().getBinding("items");
             let aFilters = [];
@@ -242,7 +250,6 @@ sap.ui.define([
             }
         },
         onValueHelpRequestLgort() {
-            var oView = this.getView();
             let oLgortDialog = sap.ui.getCore().byId("idLgortHelpDialog");
 
             var sWerksValue = this.byId("idWerks").getValue(); // 플랜트 Input 값 읽기

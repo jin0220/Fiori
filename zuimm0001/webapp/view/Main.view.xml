@@ -139,7 +139,7 @@
                                     <micro:RadialMicroChart id="idRadialChart" 
                                                             size="M" 
                                                             press=".press"
-                                                            percentage="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 }"
+                                                            percentage="{= ( (Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100 ) &gt; 100 ? 100 : (Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100 }"
                                                             valueColor="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/>
                                 </VBox>
 
@@ -147,7 +147,7 @@
                                     <micro:RadialMicroChart id="idRadialChart02" 
                                                             size="M" 
                                                             press=".press"
-                                                            percentage="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 }"
+                                                            percentage="{= ( ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100 ) &gt; 100 ? 100 : ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100 }"
                                                             valueColor="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/>
                                 </VBox>
                             </cells>
