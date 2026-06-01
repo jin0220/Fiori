@@ -16,6 +16,7 @@ sap.ui.define([
                 success: function (oData) {
                     let aResults = oData.results;
 
+                    this._oMStockSet = aResults;
                     let oJSONModelMain = new JSONModel(aResults);
                     this.getView().setModel(oJSONModelMain, "MStockSet");
 
@@ -64,14 +65,24 @@ sap.ui.define([
         // },
         onItemSelect(oEvent) {
             let oListItem = oEvent.getParameter("listItem"); // 클릭한 아이템의 데이터 
-            let sPath = oListItem.getBindingContext().getPath();
-            let oData = this._oModel.getProperty(sPath);
+            let sPath = oListItem.getBindingContext("MStockSet").getPath();
+            let oData = this.getView().getModel("MStockSet").getProperty(sPath);
 
             //============================================================================
             // 구매요청 생성 팝업
             //============================================================================
             let oDialog = sap.ui.getCore().byId("idDialog"); // sap.ui.getCore() : 현재 다이얼로그가 비동기로 로드되기 때문에 UI 전역에서 찾기 위해 사용
             let fnOpenDialog = () => {
+                // 문서 유형 콤보박스 데이터 세팅
+                let oBsartData = {
+                    "Types": [
+                        { "key": "ZNB", "text": "ZNB (표준 오더)" },
+                        { "key": "ZUB", "text": "ZUB (재고 운송 오더)" },
+                        { "key": "ZRO", "text": "ZRO (반품 구매 오더)" }
+                    ]
+                };
+                let oBsartModel = new JSONModel(oBsartData);
+
                 if (oDialog) { // 있으면 true, 없으면 undefined가 리턴됨.
                     oDialog.setModel(new JSONModel(oData), "Popup");
                     oDialog.open();
@@ -85,6 +96,7 @@ sap.ui.define([
                         controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
                     }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
                         oLoadedDialog.setModel(new JSONModel(oData), "Popup");
+                        oLoadedDialog.setModel(oBsartModel, "BsartModel");
                         oLoadedDialog.open();
                     });
                 }
@@ -347,17 +359,13 @@ sap.ui.define([
             // this._updateChartData();
         },
         _updateChartData: function () {
-            console.log("ckxm");
-            debugger;
             var oTable = this.byId("idStockTable");
             if (!oTable) { return; }
 
             var oBinding = oTable.getBinding("items");
             // var aContexts = oBinding ? oBinding.getCurrentContexts() : [];
             var aContexts = oBinding ? oBinding.getContexts() : [];
-            debugger;
-            console.log(oBinding);
-            console.log(aContexts);
+
             var oCountMap = {};
 
             // 🌟 [1단계] "플랜트-창고"를 조합하여 각각 독립된 고유한 방을 미리 개설합니다.

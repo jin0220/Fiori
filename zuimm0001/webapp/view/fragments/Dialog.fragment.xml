@@ -23,6 +23,16 @@
                     
                     <Label id="lblLgort" text="창고" />
                     <Text id="txtLgort" text="{Popup>/Lgort}" />
+
+                    <Label id="lblBsart" text="문서 유형" />
+                    <HBox id="idComBox" alignItems="Center" displayInline="true">
+                        <ComboBox id="idComboBsart" 
+                                selectedKey="{Popup>/Bsart}" 
+                                width="150px"
+                                items="{BsartModel>/Types}">
+                            <c:Item id="idBsartItem" key="{BsartModel>key}" text="{BsartModel>text}" />
+                        </ComboBox>
+                    </HBox>
                     
                     <Label id="lblReqQty" text="제안 수량" />
                     <HBox id="idQtyBox" alignItems="Center" displayInline="true">
