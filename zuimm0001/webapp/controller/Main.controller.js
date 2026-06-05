@@ -9,6 +9,7 @@ sap.ui.define([
 
     return Controller.extend("zuimm0001.controller.Main", {
         onInit() {
+            // test
             this._oModel = this.getOwnerComponent().getModel();
 
             this._aUniqueMaterials = [];
@@ -120,7 +121,7 @@ sap.ui.define([
             let lfdat = sap.ui.getCore().byId("idDatePickerBadat").getDateValue(); // 오늘 날짜 (YYYY-MM-DD)
 
             this._oModel.create("/PRSet", {
-                Matnr: matnr,  
+                Matnr: matnr,
                 Werks: werks,
                 Lgort: lgort,
                 Bsart: bsart,

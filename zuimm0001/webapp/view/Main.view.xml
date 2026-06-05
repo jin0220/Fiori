@@ -8,7 +8,7 @@
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
-    
+    <!-- test -->
     <f:DynamicPage id="page" headerExpanded="true">
         
         <f:title>
@@ -120,7 +120,7 @@
                         <Column id="colResqu"><Text id="txtColResqu" text="입고예정 수량"/></Column>
                         <Column id="colEisbe"><Text id="txtColEisbe" text="안전재고"/></Column>
                         <Column id="colLack" width="10rem"><Text id="txtColLack" text="창고 점유율 (현재)"/></Column> <!-- 어느정도 저장할 수 있는지 -->
-                        <Column id="colTotal" width="10rem"><Text id="txtColTotal" text="창고 점유율 (입고포함)"/></Column>
+                        <Column id="colTotal" width="10rem"><Text id="txtColTotal" text="재고 확보율 (입고포함)"/></Column> <!-- 어느정도 확보할 수 있는지 -->
                     </columns>
                     
                     <items>
@@ -140,7 +140,7 @@
                                                             size="M" 
                                                             press=".press"
                                                             percentage="{= ( (Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100 ) &gt; 100 ? 100 : (Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100 }"
-                                                            valueColor="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/>
+                                                            valueColor="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/> <!--창고의 점유율이 80% 넘으면 경고의 의미로 빨간색으로 표현-->
                                 </VBox>
 
                                 <VBox id="idVBoxChart02">
@@ -148,7 +148,7 @@
                                                             size="M" 
                                                             press=".press"
                                                             percentage="{= ( ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100 ) &gt; 100 ? 100 : ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100 }"
-                                                            valueColor="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/>
+                                                            valueColor="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 >= 20 ? 'Good' : 'Error' }"/> <!--입고 예정 수량이랑 합쳐진 창고의 점유율이 20% 넘으면 확보량이 충분하다는 의미-->
                                 </VBox>
                             </cells>
                         </ColumnListItem>
