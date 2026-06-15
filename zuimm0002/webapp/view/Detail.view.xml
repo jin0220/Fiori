@@ -1,0 +1,53 @@
+<mvc:View
+    controllerName="zuimm0002.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:suite="sap.suite.ui.commons">
+    
+    <Page id="_IDGenPage" title="구매 진행 프로세스 실시간 추적" class="sapUiContentPadding">
+        <content>
+            
+            <Panel id="_IDGenPanel" 
+                   width="auto" 
+                   class="sapUiResponsiveMargin sapUiCard sapUiResponsiveContentPadding">
+                   <headerToolbar>
+                        <Toolbar id="_IDGenToolbar">
+                            <Title id="panelTitle" text="자재 정보 로딩 중..." level="H2" />
+                        </Toolbar>
+                    </headerToolbar>
+                <content>
+                    
+                    <VBox id="_IDGenVBox" class="sapUiLargeMarginBegin">
+
+                        <suite:ProcessFlow id="idPurchasingProcessFlow" 
+                                            wheelZoomable="false"
+                                            nodes="{ProcessModel>/nodes}"
+                                            lanes="{ProcessModel>/lanes}"
+                                            nodePress=".onNodePress">
+                            <suite:nodes>
+                                <suite:ProcessFlowNode id="_IDGenProcessFlowNode"
+                                    nodeId="{ProcessModel>id}"
+                                    laneId="{ProcessModel>lane}"
+                                    title="{ProcessModel>title}"
+                                    titleAbbreviation="{ProcessModel>titleAbbr}"
+                                    children="{ProcessModel>children}"
+                                    state="{ProcessModel>state}"
+                                    texts="{ProcessModel>texts}" />
+                            </suite:nodes>
+                            <suite:lanes>
+                                <suite:ProcessFlowLaneHeader id="_IDGenProcessFlowLaneHeader"
+                                    laneId="{ProcessModel>id}"
+                                    iconSrc="{ProcessModel>icon}"
+                                    text="{ProcessModel>text}"
+                                    position="{ProcessModel>position}" />
+                            </suite:lanes>
+                        </suite:ProcessFlow>
+
+                    </VBox>
+                    
+                </content>
+            </Panel>
+            
+        </content>
+    </Page>
+</mvc:View>

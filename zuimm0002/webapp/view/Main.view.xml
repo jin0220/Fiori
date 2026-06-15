@@ -1,0 +1,103 @@
+<mvc:View controllerName="zuimm0002.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:micro="sap.suite.ui.microchart"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <f:DynamicPage id="page" headerExpanded="true">
+        
+        <f:title>
+            <f:DynamicPageTitle id="pageTitle">
+                <f:heading>
+                    <Title id="mainTitle" text="구매진행 현황 트래킹"/>
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        
+        <f:header>
+            <f:DynamicPageHeader id="pageHeader">
+                <fb:FilterBar id="filterbar" persistencyKey="myPersKey" useToolbar="false" search=".onSearch" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
+                    <fb:filterGroupItems>
+                        <fb:FilterGroupItem id="filterGroupBanfn" groupName="G1" name="Banfn" label="구매요청번호" visibleInFilterBar="true">
+                            <fb:control>
+                                <Input id="idBanfn"/>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem id="filterGroupMatnr" groupName="G1" name="Matnr" label="자재코드" visibleInFilterBar="true">
+                            <fb:control>
+                                <Input 
+                                    id="idMatnr" 
+                                    placeholder="자재코드 또는 자재명 입력..."
+                                    showValueHelp="true" 
+                                    valueHelpRequest=".onValueHelpMatnr"
+                                    showSuggestion="true"
+                                    suggest=".onSuggestMatnr"
+                                    suggestionItems="{MaterialSet>/}"
+                                    filterSuggests="false">
+                                    <suggestionItems>
+                                        <core:ListItem 
+                                            id="idMatnrCom" 
+                                            key="{MaterialSet>Matnr}" 
+                                            text="{MaterialSet>Matnr}" 
+                                            additionalText="{MaterialSet>Maktx}" />
+                                    </suggestionItems>
+                                </Input>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem id="filterGroupWerks" groupName="G1" name="Werks" label="플랜트" visibleInFilterBar="true">
+                            <fb:control>
+                                <Input id="idWerks" showValueHelp="true" valueHelpRequest=".onValueHelpRequest" />
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem id="filterGroupLgort" groupName="G1" name="Lgort" label="창고" visibleInFilterBar="true">
+                            <fb:control>
+                                <Input id="idLgort" showValueHelp="true" valueHelpRequest=".onValueHelpRequestLgort" />
+                            </fb:control>
+                        </fb:FilterGroupItem>
+                    </fb:filterGroupItems>
+                </fb:FilterBar>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <f:content>
+            <VBox id="idContentWrapper">
+                <Table id="idStockTable" items="{PRSet>/}" itemPress=".onItemSelect">
+                    <columns>
+                        <Column id="colBanfn"><Text id="txtColBanfn" text="구매요청번호"/></Column>
+                        <Column id="colBnfpo"><Text id="txtColBnfpo" text="항목번호"/></Column>
+                        <Column id="colWerks"><Text id="txtColWerks" text="플랜트"/></Column>
+                        <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
+                        <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
+                        <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
+                        <!-- <Column id="colStatu"><Text id="txtColStatu" text="승인상태"/></Column> -->
+                        <!-- <Column id="colEbeln"><Text id="txtColEbeln" text="구매오더번호"/></Column> -->
+                        <!-- <Column id="colBadat"><Text id="txtColBadat" text="요청일자"/></Column> -->
+                        <!-- <Column id="colLfdat"><Text id="txtColLfdat" text="납기요청일"/></Column> -->
+                    </columns>
+                    
+                    <items>
+                        <ColumnListItem id="idRowItem" type="Active">
+                            <cells>
+                                <Text id="idTextBanfn" text="{PRSet>Banfn}"/>
+                                <Text id="idTextBnfpo" text="{PRSet>Bnfpo}"/>
+                                <Text id="idTextWerks" text="{PRSet>Werks}"/>
+                                <Text id="idTextLgort" text="{PRSet>Lgort}"/>
+                                <Text id="idTextMatnr" text="{PRSet>Matnr}"/>
+                                <Text id="idTextMaktx" text="{PRSet>Maktx}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+                
+            </VBox>
+        </f:content>
+        
+    </f:DynamicPage>
+</mvc:View>

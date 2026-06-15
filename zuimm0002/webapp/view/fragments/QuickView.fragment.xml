@@ -1,0 +1,89 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+    
+    <Dialog id="idQuickViewDialog" title="문서 상세 정보" contentWidth="380px">
+        <content>
+            <form:SimpleForm editable="false" 
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4" 
+                labelSpanL="4" 
+                labelSpanM="4" 
+                labelSpanS="4"
+                adjustLabelSpan="false"
+                emptySpanXL="0" 
+                emptySpanL="0" 
+                emptySpanM="0" 
+                emptySpanS="0"
+                columnsXL="1" 
+                columnsL="1" 
+                columnsM="1">
+                <form:content>
+                    <Label text="구분" />
+                    <Text text="{quickViewModel>/titleAbbr}" />
+
+                    <Label text="문서 번호" />
+                    <Text text="{quickViewModel>/title}" />
+                    
+                    <Label text="현재 상태" />
+                    <Text text="{quickViewModel>/statusText}" />
+
+                    <!-- 구매 요청 -->
+                    <Label text="플랜트" visible="{quickViewModel>/isPR}" />
+                    <Text text="{quickViewModel>/Werks}" visible="{quickViewModel>/isPR}" />   
+
+                    <Label text="창고" visible="{quickViewModel>/isPR}" />
+                    <Text text="{quickViewModel>/Lgort}" visible="{quickViewModel>/isPR}" />
+
+                    <Label text="요청일자" visible="{quickViewModel>/isPR}" />
+                    <Text text="{quickViewModel>/Badat}" visible="{quickViewModel>/isPR}" />
+
+                    <!-- 구매 오더 -->
+                    <Label text="구매오더 생성일" visible="{quickViewModel>/isPO}" />
+                    <Text text="{quickViewModel>/Erdat}" visible="{quickViewModel>/isPO}" />
+
+                    <Label text="공급업체" visible="{quickViewModel>/isPO}" />
+                    <Text text="{quickViewModel>/vendorName}" visible="{quickViewModel>/isPO}" />
+
+                    <Label text="구매 수량" visible="{quickViewModel>/isPO}" />
+                    <Text text="{quickViewModel>/Menge}" visible="{quickViewModel>/isPO}" />
+                    
+                    <Label text="총단가" visible="{quickViewModel>/isPO}" />
+                    <Text text="{quickViewModel>/Brtwr}" visible="{quickViewModel>/isPO}" />
+
+                    <!-- 자재문서 -->
+                    <Label text="플랜트" visible="{quickViewModel>/isGR}" />
+                    <Text text="{quickViewModel>/Werks}" visible="{quickViewModel>/isGR}" />
+
+                    <Label text="입고 창고" visible="{quickViewModel>/isGR}" />
+                    <Text text="{quickViewModel>/lgort}" visible="{quickViewModel>/isGR}" />
+
+                    <Label text="입고일" visible="{quickViewModel>/isGR}" />
+                    <Text text="{quickViewModel>/Budat}" visible="{quickViewModel>/isGR}" />
+
+                    <Label text="입고수량" visible="{quickViewModel>/isGR}" />
+                    <Text text="{quickViewModel>/Menge}" visible="{quickViewModel>/isGR}" />
+
+                    <!-- 송장 검증 -->
+                    <Label text="공급업체" visible="{quickViewModel>/isIV}" />
+                    <Text text="{quickViewModel>/Lifnr}" visible="{quickViewModel>/isIV}" />
+
+                    <Label text="발급일자" visible="{quickViewModel>/isIV}" />
+                    <Text text="{quickViewModel>/Budat}" visible="{quickViewModel>/isIV}" />
+
+                    <Label text="총금액" visible="{quickViewModel>/isIV}" />
+                    <Text text="{quickViewModel>/Rmwwr}" visible="{quickViewModel>/isIV}" />
+
+                    <Label text="설명" visible="{quickViewModel>/isIV}" />
+                    <Text text="{quickViewModel>/Sgtxt}" visible="{quickViewModel>/isIV}" />
+
+                </form:content>
+            </form:SimpleForm>
+        </content>
+        <endButton>
+            <Button text="닫기" press=".onCloseDialog" type="Emphasized" />
+        </endButton>
+    </Dialog>
+    
+</core:FragmentDefinition>
