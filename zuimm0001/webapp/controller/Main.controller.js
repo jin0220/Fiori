@@ -19,6 +19,7 @@ sap.ui.define([
 
                     this._oMStockSet = aResults;
                     let oJSONModelMain = new JSONModel(aResults);
+                    oJSONModelMain.setSizeLimit(500);
                     this.getView().setModel(oJSONModelMain, "MStockSet");
 
                     this._updateChartData();
@@ -38,6 +39,18 @@ sap.ui.define([
                 }
             });
 
+            this._werksSet = [];
+            this._oModel.read("/WerksSet", {
+                success: function (oData) {
+
+                    this._werksSet = oData.results;
+
+                }.bind(this),
+                error: function (oError) {
+                    console.error("데이터 조회 실패: ", oError);
+                }
+            });
+
             this._lgortSet = [];
             this._oModel.read("/LgortSet", {
                 success: function (oData) {
@@ -50,6 +63,24 @@ sap.ui.define([
                 }
             });
         },
+        // onAfterRendering: function () {
+        //     // 1. 내 FilterBar 객체 가져오기
+        //     var oFilterBar = this.byId("idFilterBar"); 
+            
+        //     if (oFilterBar) {
+        //         // 2. FilterBar 내부에 숨겨져 있는 표준 [Go] 버튼 객체 찾아오기
+        //         var oGoButton = oFilterBar._oSearchButton; 
+        //         if (oGoButton) {
+        //             // 3. 버튼 텍스트를 강제로 "조회"로 세팅!
+        //             oGoButton.setText("조회"); 
+        //         }
+
+        //         var oAdaptButton = oFilterBar._oFiltersButton;
+        //         if (oAdaptButton) {
+        //             oAdaptButton.setText("필터 적용"); // 샘플처럼 '필터 적용' 혹은 '필터 선택'으로 세팅
+        //         }
+        //     }
+        // },
         onItemSelect(oEvent) {
             let oListItem = oEvent.getParameter("listItem"); // 클릭한 아이템의 데이터 
             let sPath = oListItem.getBindingContext("MStockSet").getPath();
@@ -141,6 +172,184 @@ sap.ui.define([
         onClose() {
             sap.ui.getCore().byId("idDialog").close();
         },
+
+        /**
+         * 1. [만능 F4] 자재/플랜트/창고 인풋 필드가 공통으로 바라보는 서치헬프 오픈 함수
+         */
+        /**
+         * [안전성 100% 보장 버전] 공통 Value Help 요청 핸들러
+         */
+        onValueHelpRequest: function (oEvent) {
+            var oView = this.getView();
+            var oInput = oEvent.getSource(); 
+            var sInputId = oInput.getId();
+
+            // 1. 이미 다이얼로그 객체(_oValueHelpDialog)가 만들어져 있다면 바로 사용
+            if (this._oValueHelpDialog) {
+                this._oValueHelpDialog.data("targetInput", oInput);
+                this._configValueHelpDialog(this._oValueHelpDialog, sInputId);
+                this._oValueHelpDialog.open();
+                return;
+            }
+
+            // 2. 처음 누른 거라면 로드 시작 (this._oValueHelpDialog 변수에 진짜 객체를 직접 저장)
+            sap.ui.core.Fragment.load({
+                name: "zuimm0001.view.fragments.ValueHelpDialog",
+                controller: this
+            }).then(function (oDialog) {
+                this._oValueHelpDialog = oDialog; // 🌟 껍데기가 아닌 진짜 다이얼로그 인스턴스를 클래스 변수에 저장!
+                oView.addDependent(this._oValueHelpDialog);
+
+                // 데이터 꼬리표 저장 및 조립
+                this._oValueHelpDialog.data("targetInput", oInput);
+                this._configValueHelpDialog(this._oValueHelpDialog, sInputId);
+                
+                this._oValueHelpDialog.open();
+            }.bind(this));
+        },
+
+        /**
+         * 2. [만능 셋업] 과거 코드의 수동 모델 생성 및 플랜트 필터 로직 100% 이식 버전
+         */
+        _configValueHelpDialog: function (oDialog, sInputId) {
+            if (sInputId.includes("idMatnr")) {
+                // 🅰️ 자재코드: 과거 코드의 this._aUniqueMaterials 데이터를 JSONModel로 직접 구워 넣음!
+                oDialog.setTitle("자재코드 선택");
+                oDialog.setNoDataText("조회된 자재가 없습니다.");
+                
+                // 🌟 [중요] 내 프로젝트 고유 데이터 주입!
+                oDialog.setModel(new JSONModel(this._aUniqueMaterials), "MaterialHelp");
+                
+                oDialog.bindAggregation("items", {
+                    path: "MaterialHelp>/", 
+                    template: new sap.m.StandardListItem({
+                        title: "{MaterialHelp>Matnr}",       
+                        description: "{MaterialHelp>Maktx}",  
+                        type: "Active"
+                    })
+                });
+
+            } else if (sInputId.includes("idWerks")) {
+                // 🅱️ 플랜트: 뷰의 메인 OData 기반 모델 사용
+                oDialog.setTitle("플랜트 선택");
+                oDialog.setNoDataText("조회된 플랜트가 없습니다.");
+                
+                // 메인 뷰 모델 주소 명시적 상속
+                // oDialog.setModel(this.getView().getModel());
+                oDialog.setModel(new JSONModel(this._werksSet), "WerksSet");
+                
+                oDialog.bindAggregation("items", {
+                    path: "WerksSet>/", 
+                    template: new sap.m.StandardListItem({
+                        title: "{WerksSet>WerksId}",  
+                        description: "{WerksSet>Name1}", 
+                        type: "Active"
+                    })
+                });
+
+            } else if (sInputId.includes("idLgort")) {
+                // 🅲 창고: 과거 코드의 '플랜트 값 연동 필터' 및 'this._lgortSet' 모델 주입 완전 복원!
+                oDialog.setTitle("창고 선택");
+                oDialog.setNoDataText("조회된 창고가 없습니다.");
+                
+                // 🌟 [중요] 내 프로젝트 고유 데이터 주입!
+                oDialog.setModel(new JSONModel(this._lgortSet), "LgortSet");
+
+                // 🌟 과거 코드에 있던 '플랜트 인풋 값 읽어서 필터링'하는 로직 복원
+                var sWerksValue = this.byId("idWerks").getValue(); 
+                var aFilters = [];
+                if (sWerksValue) {
+                    aFilters.push(new Filter("Werks", FilterOperator.EQ, sWerksValue));
+                }
+
+                oDialog.bindAggregation("items", {
+                    path: "LgortSet>/", 
+                    template: new sap.m.StandardListItem({
+                        title: "{LgortSet>LgortId}",  
+                        description: "{LgortSet>Adrnr}", 
+                        info: "{= '플랜트: ' + ${LgortSet>Werks} }", 
+                        type: "Active"
+                    })
+                });
+            }
+        },
+        onConfirmCommonPopup: function (oEvent) {
+                var oSelectedItem = oEvent.getParameter("selectedItem");
+                var oDialog = oEvent.getSource();
+                var oTargetInput = oDialog.data("targetInput");
+
+                if (!oSelectedItem) {
+                    return; // 선택 안 하고 닫으면 그냥 종료
+                }
+
+                var sTargetInputId = oTargetInput.getId();
+
+                if (sTargetInputId.includes("idMatnr")) {
+                    let sSelectedMatnr = oSelectedItem.getBindingContext("MaterialHelp").getProperty("Matnr");
+                    oTargetInput.setValue(sSelectedMatnr);
+                    
+                } else if (sTargetInputId.includes("idWerks")) {
+                    let sSelectedWerks = oSelectedItem.getBindingContext().getProperty("WerksId");
+                    oTargetInput.setValue(sSelectedWerks);
+                    
+                } else if (sTargetInputId.includes("idLgort")) {
+                    let sSelectedLgort = oSelectedItem.getBindingContext("LgortSet").getProperty("LgortId");
+                    let sSelectedWerks = oSelectedItem.getBindingContext("LgortSet").getProperty("Werks");
+                    
+                    oTargetInput.setValue(sSelectedLgort);
+                    this.byId("idWerks").setValue(sSelectedWerks);
+                }
+             
+        },
+        onSearchValueHelp: function (oEvent) {
+            // 1. 사용자가 검색창에 입력한 텍스트 가져오기
+            var sValue = oEvent.getParameter("value");
+            
+            // 2. 팝업창의 리스트 바인딩 객체 가져오기
+            var oBinding = oEvent.getSource().getBinding("items");
+            if (!oBinding) { return; }
+
+            // 3. F4를 요청했던 원본 인풋의 ID를 추적하여 어떤 데이터셋인지 알아냅니다.
+            var oTargetInput = oEvent.getSource().data("targetInput");
+            var sTargetInputId = oTargetInput ? oTargetInput.getId() : "";
+            
+            var aFilters = [];
+
+            // 검색어가 있을 때만 필터 배열 구성
+            if (sValue) {
+                if (sTargetInputId.includes("idMatnr")) {
+                    // 🅰️ 자재코드 검색: 자재코드 또는 자재명에 포함되어 있으면 매칭
+                    aFilters.push(new Filter({
+                        filters: [
+                            new Filter("Matnr", FilterOperator.Contains, sValue),
+                            new Filter("Maktx", FilterOperator.Contains, sValue)
+                        ],
+                        and: false // OR 조건
+                    }));
+                } else if (sTargetInputId.includes("idWerks")) {
+                    // 🅱️ 플랜트 검색: 플랜트코드 또는 플랜트명 매칭
+                    aFilters.push(new Filter({
+                        filters: [
+                            new Filter("WerksId", FilterOperator.Contains, sValue),
+                            new Filter("Name1", FilterOperator.Contains, sValue)
+                        ],
+                        and: false
+                    }));
+                } else if (sTargetInputId.includes("idLgort")) {
+                    // 🅲 창고 검색: 창고코드 또는 창고주소 매칭
+                    aFilters.push(new Filter({
+                        filters: [
+                            new Filter("LgortId", FilterOperator.Contains, sValue),
+                            new Filter("Adrnr", FilterOperator.Contains, sValue)
+                        ],
+                        and: false
+                    }));
+                }
+            }
+
+            // 4. 조립된 필터를 SelectDialog 리스트에 최종 바인딩 적용!
+            oBinding.filter(aFilters);
+        },
         // =======================================================
         // 제안 기능 (Input 타이핑 시 자동완성 필터링)
         // =======================================================
@@ -166,144 +375,6 @@ sap.ui.define([
             if (oBinding) {
                 oBinding.filter(aFilters);
             }
-        },
-        onValueHelpMatnr: function () {
-            let oMatnrDialog = sap.ui.getCore().byId("idMatnrHelpDialog");
-
-            if (oMatnrDialog) {
-                oMatnrDialog.open();
-            } else {
-                Fragment.load({
-                    name: "zuimm0001.view.fragments.MatnrHelp",
-                    type: "XML",
-                    controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
-                }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
-                    oLoadedDialog.setModel(new JSONModel(this._aUniqueMaterials), "MaterialHelp");
-                    oLoadedDialog.open();
-                }.bind(this));
-            }
-        },
-
-        // 🌟 팝업창 안에서 검색창(FilterBar) 엔터 쳤을 때
-        onSearchMatnrPopup: function (oEvent) {
-            let sValue = oEvent.getParameter("value");
-            let oBinding = oEvent.getSource().getBinding("items");
-            let aFilters = [];
-
-            if (sValue) {
-                aFilters = [
-                    new Filter({
-                        filters: [
-                            new Filter("Matnr", FilterOperator.Contains, sValue),
-                            new Filter("Maktx", FilterOperator.Contains, sValue)
-                        ],
-                        and: false
-                    })
-                ];
-            }
-            oBinding.filter(aFilters);
-        },
-
-        // 🌟 팝업창에서 자재를 선택(OK) 했을 때
-        onConfirmMatnr: function (oEvent) {
-            // eslint-disable-next-line no-console
-            console.log("onConfirmMatnr 실행됨");
-            let oSelectedItem = oEvent.getParameter("selectedItem");
-            let oInput = this.byId("idMatnr"); // 메인 화면 Input ID
-
-            if (oSelectedItem) {
-                // 선택한 행의 자재코드를 쏙 빼옵니다
-                let sSelectedMatnr = oSelectedItem.getBindingContext("MaterialHelp").getProperty("Matnr");
-                oInput.setValue(sSelectedMatnr);
-            }
-        },
-        onValueHelpRequest() {
-            var oView = this.getView();
-            let oWerksDialog = sap.ui.getCore().byId("idWerksHelpDialog"); // sap.ui.getCore() : 현재 다이얼로그가 비동기로 로드되기 때문에 UI 전역에서 찾기 위해 사용
-            // let oData = this._oWerksModel.getData();
-
-            if (oWerksDialog) { // 있으면 true, 없으면 undefined가 리턴됨.
-                // oDialog.setModel(new JSONModel(oData), "PlantSet");
-                oWerksDialog.open();
-            }
-            else {
-                // Fragment는 비동기로 동작
-                Fragment.load({
-                    name: "zuimm0001.view.fragments.WerksHelp",
-                    type: "XML",
-                    controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
-                }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
-                    oView.addDependent(oLoadedDialog);
-                    oLoadedDialog.open();
-                });
-            }
-        },
-        onConfirmWerks: function (oEvent) {
-            // 1. 사용자가 클릭한 행(Row)의 데이터를 가져옵니다.
-            let oSelectedItem = oEvent.getParameter("selectedItem");
-            let oInput = this.byId("idWerks"); // 메인 화면의 창고 Input ID
-
-            if (oSelectedItem) {
-                let sSelectedKey = oSelectedItem.getBindingContext().getProperty("WerksId");
-
-                // 3. 메인 화면의 창고 입력창에 값을 넣어줍니다!
-                oInput.setValue(sSelectedKey);
-            }
-        },
-        onValueHelpRequestLgort() {
-            let oLgortDialog = sap.ui.getCore().byId("idLgortHelpDialog");
-
-            var sWerksValue = this.byId("idWerks").getValue(); // 플랜트 Input 값 읽기
-
-            // 팝업 내부 테이블이나 리스트에 적용할 필터 배열 생성
-            var aFilters = [];
-            if (sWerksValue) {
-                aFilters.push(new sap.ui.model.Filter("Werks", sap.ui.model.FilterOperator.EQ, sWerksValue));
-            }
-
-            if (oLgortDialog) {
-                // 이미 만들어져 있다면 그냥 엽니다. (데이터는 알아서 갱신됨)
-                var oBinding = oLgortDialog.getBinding("items"); // 프래그먼트 구조에 맞춰 select나 items 바인딩 타겟팅
-                if (oBinding) {
-                    oBinding.filter(aFilters);
-                }
-                oLgortDialog.open();
-            } else {
-                // Fragment는 비동기로 동작
-                Fragment.load({
-                    name: "zuimm0001.view.fragments.LgortHelp",
-                    type: "XML",
-                    controller: this // 로드하는 fragment에서 사용할 수 있도록 현재 controller 넘겨줌
-                }).then(function (oLoadedDialog) { // 로드한 후의 반환값이 인자로 들어옴.
-                    oLoadedDialog.setModel(new JSONModel(this._lgortSet), "LgortSet");
-
-                    var oBinding = oLoadedDialog.getBinding("items"); // 프래그먼트 구조에 맞춰 select나 items 바인딩 타겟팅
-                    if (oBinding) {
-                        oBinding.filter(aFilters);
-                    }
-
-                    oLoadedDialog.open();
-                }.bind(this));
-            }
-        },
-        onConfirmLgort: function (oEvent) {
-            // 1. 사용자가 클릭한 행(Row)의 데이터를 가져옵니다.
-            let oSelectedItem = oEvent.getParameter("selectedItem");
-            let oInput = this.byId("idLgort"); // 메인 화면의 창고 Input ID
-            let oWerksInput = this.byId("idWerks");
-
-            if (oSelectedItem) {
-                // 2. 바인딩된 데이터 컨텍스트에서 원하는 필드(LgortId) 값을 쏙 빼옵니다.
-                let sSelectedKey = oSelectedItem.getBindingContext("LgortSet").getProperty("LgortId");
-                let sSelectedWerks = oSelectedItem.getBindingContext("LgortSet").getProperty("Werks");
-
-                // 3. 메인 화면의 창고 입력창에 값을 넣어줍니다!
-                oInput.setValue(sSelectedKey);
-                oWerksInput.setValue(sSelectedWerks);
-            }
-        },
-        onCloseHelp: function (oEvent) {
-            oEvent.getSource().close();
         },
         // 1. [신규 추가] 상단 필터바에서 [Go]를 누르거나 화면이 처음 켜질 때 실행되는 검색 이벤트
         onSearch: function () {
@@ -366,6 +437,9 @@ sap.ui.define([
             // 예시: OData 데이터 로드가 완료되는 시점이나 테이블 바인딩 완료 후 아래 함수를 실행합니다.
             // this._updateChartData();
         },
+        //======================================================
+        // 차트 데이터 갱신 함수: 테이블 바인딩 데이터를 기반으로 차트에 표시할 위험 자재 건수를 계산하여 JSON 모델로 변환
+        //======================================================
         _updateChartData: function () {
             var oTable = this.byId("idStockTable");
             if (!oTable) { return; }
@@ -382,7 +456,7 @@ sap.ui.define([
                 var sWerks = oRowData.Werks; // 플랜트 (예: P100, P200)
                 var sLgort = oRowData.Lgort; // 창고 (예: 1000)
 
-                if (sWerks && sLgort) {
+                if (sWerks && sLgort && sLgort !== "4000") { // 창고 코드가 "4000"인 경우는 제외 (예: 특정 창고 제외)
                     // 주머니 이름표를 "P100-1000", "P200-1000" 형태로 완벽히 격리시킵니다!
                     var sKey = sWerks + "-" + sLgort;
                     if (!oCountMap[sKey]) {
@@ -399,7 +473,7 @@ sap.ui.define([
                 var nLabst = Number(oRowData.Labst); // 가용재고
                 var nEisbe = Number(oRowData.Eisbe); // 안전재고
 
-                if (sWerks && sLgort && (nLabst < nEisbe)) {
+                if (sWerks && sLgort && sLgort !== "4000" && (nLabst < nEisbe)) {
                     var sKey = sWerks + "-" + sLgort;
                     oCountMap[sKey]++; // 고유 방에 카운트 업!
                 }
@@ -432,24 +506,42 @@ sap.ui.define([
         onSelectChartSlice: function (oEvent) {
             var aSelectedData = oEvent.getParameter("data");
             var oTable = this.byId("idStockTable");
+            if (!oTable) { return; }
+
+            var oBinding = oTable.getBinding("items");
 
             if (aSelectedData && aSelectedData.length > 0) {
-                // 사용자가 차트에서 선택한 막대의 '창고 코드'를 쏙 빼옵니다.
-                var sSelectedLgort = aSelectedData[0].data.창고;
+                // 🌟 차트 차원(Dimension) 정의에 맞춰 창고 코드를 정확히 빼옵니다.
+                // 만약 text가 "창고"가 아니라 데이터 바인딩 명칭이라면 Lgort 등으로 맞춰야 합니다.
+                var sSelectedLgort = aSelectedData[0].data.창고 || aSelectedData[0].data.Lgort;
 
-                // 하단 테이블에 걸어줄 2가지 쌍방향 필터 객체 생성
-                // 조건 1: 사용자가 클릭한 그 창고 코드여야 함
-                var oLgortFilter = new sap.ui.model.Filter("Lgort", sap.ui.model.FilterOperator.EQ, sSelectedLgort);
+                // 🌟 [핵심] 창고 일치 여부와 재고 부족 조건을 동시 검증하는 커스텀 필터 생성!
+                var oCombinedFilter = new sap.ui.model.Filter({
+                    path: "", // 전체 로우 데이터를 검사하기 위해 비워둠
+                    test: function (oRowData) {
+                        if (!oRowData) { return false; }
+                        
+                        var nLabst = Number(oRowData.Labst); // 가용재고
+                        var nEisbe = Number(oRowData.Eisbe); // 안전재고
+                        
+                        // 조건: 클릭한 창고 코드이면서 동시에 재고가 부족한(Labst < Eisbe) 자재만 통과!
+                        return oRowData.Lgort === sSelectedLgort && nLabst < nEisbe;
+                    }
+                });
 
-                // 조건 2: 여전히 화면에는 위험 자재(가용재고 < 안전재고)만 필터링해서 보여줌
-                // 단, 백엔드 필터 문법 한계가 있다면 컨트롤러 단에서 가볍게 창고 코드(oLgortFilter)만 밀어 넣으셔도 훌륭합니다.
-
-                // 테이블에 필터 주입! (차트에서 누른 창고의 빨간 줄 자재들만 싹 정렬됨!)
-                oTable.getBinding("items").filter([oLgortFilter]);
+                // 테이블에 만능 필터 주입
+                oBinding.filter([oCombinedFilter]);
 
             } else {
-                // 차트 빈 곳을 누르면 테이블 필터를 싹 풀고 전체 리스트로 원복합니다.
-                oTable.getBinding("items").filter([]);
+                // 차트 빈 곳을 누르면 필터를 해제하되, 
+                // 메인 화면 기본 규칙이 원래 부족 자재만 보여주는 상태였다면 기본 부족 필터로 원복해야 합니다.
+                var oDefaultFilter = new sap.ui.model.Filter({
+                    path: "",
+                    test: function (oRowData) {
+                        return oRowData && Number(oRowData.Labst) < Number(oRowData.Eisbe);
+                    }
+                });
+                oBinding.filter([oDefaultFilter]);
             }
         }
     });

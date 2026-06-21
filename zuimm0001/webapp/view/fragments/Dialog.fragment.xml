@@ -24,7 +24,7 @@
                     <Label id="lblLgort" text="창고" />
                     <Text id="txtLgort" text="{Popup>/Lgort}" />
 
-                    <Label id="lblBsart" text="문서 유형" />
+                    <Label id="lblBsart" text="문서 유형" required="true"/>
                     <HBox id="idComBox" alignItems="Center" displayInline="true">
                         <ComboBox id="idComboBsart" 
                                 selectedKey="{Popup>/Bsart}" 
@@ -34,16 +34,22 @@
                         </ComboBox>
                     </HBox>
                     
-                    <Label id="lblReqQty" text="제안 수량" />
+                    <Label id="lblReqQty" text="제안 수량" required="true"/>
                     <HBox id="idQtyBox" alignItems="Center" displayInline="true">
-                        <Input id="idInputReqQty" value="{ReqQty}" type="Number" width="150px" />
+                        <Input id="idInputReqQty" value="{ReqQty}" type="Number" width="150px"/>
                         <!-- <Text id="txtUnit" text="L" class="sapUiTinyMarginBegin" /> -->
                     </HBox>
                     
-                    <Label id="lblBadat" text="납기요청일" />
+                    <Label id="lblBadat" text="납기요청일" required="true"/>
                     <DatePicker 
                         id="idDatePickerBadat" 
-                        value="{Badat}" 
+                        value="{
+                            path: 'Badat',
+                            type: 'sap.ui.model.type.Date',
+                            formatOptions: {
+                                pattern: 'yyyy-MM-dd',
+                                UTC: false }
+                        }"
                         valueFormat="yyyy-MM-dd" 
                         displayFormat="yyyy-MM-dd" 
                         placeholder="e.g. 2026-12-31" 
