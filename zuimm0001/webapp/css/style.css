@@ -1,4 +1,42 @@
+.csToolbar {
+    /* UI5 css 우선 순위가 더 높기 때문에 커스텀 css 입히기 위해 !important 사용 */
+    height: auto !important;
+
+    padding-top: 13px !important;
+    padding-bottom: 13px !important;
+
+}
+
 .csCardTitle {
-    /* font-size: 1.5rem; */
+    font-size: 0.9rem !important;
     font-weight: bold;
+    margin: 0 !important;
+}
+
+.csBox {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 50%;
+}
+
+.csRateText {
+    width: fit-content;
+    font-weight: bold;
+}
+
+.csChart {
+    justify-self: center;
+}
+
+.csCol {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 50%;
+}
+
+.csTxt.sapMText {
+    width: 40% !important;
+    text-align: right !important;
 }

@@ -63,9 +63,9 @@
 
         <f:content>
             <VBox id="idContentWrapper">
-                <Panel id="idChartPanel" width="auto" class="sapUiResponsiveMargin" accessibleRole="Region">
+                <Panel id="idChartPanel" width="100%" class="sapUiNoContentPadding sapUiCurrentWindowWidth" accessibleRole="Region">
                     <headerToolbar>
-                        <OverflowToolbar>
+                        <OverflowToolbar class="csToolbar">
                             <Title class="csCardTitle" text="창고별 부족 자재 건수"/>
                         </OverflowToolbar>
                     </headerToolbar>
@@ -73,7 +73,8 @@
                         <viz:VizFrame id="idStockChart" 
                                     vizType="bar" 
                                     selectData=".onSelectChartSlice" 
-                                    width="100%" 
+                                    class="sapUiResponsiveContentPadding csChart"
+                                    width="80%" 
                                     height="250px"
                                     vizProperties="{
                                         'valueAxis': {
@@ -94,6 +95,9 @@
                                         },
                                         title: {
                                             visible: false
+                                        },
+                                        'legend': {
+                                            'visible': false 
                                         }
                                     }">
                             <viz:dataset>
@@ -116,9 +120,9 @@
                     </content>
                 </Panel>
 
-                <Panel id="idTablePanel" width="auto" class="sapUiResponsiveMargin" accessibleRole="Region">
+                <Panel id="idTablePanel" width="100%" class="sapUiNoContentPadding sapUiCurrentWindowWidth sapUiMediumMarginTop" accessibleRole="Region">
                     <headerToolbar>
-                        <OverflowToolbar>
+                        <OverflowToolbar class="csToolbar">
                             <Title class="csCardTitle" text="재고 목록"/>
                         </OverflowToolbar>
                     </headerToolbar>
@@ -146,13 +150,13 @@
                                         <Text id="idTextWerks" text="{MStockSet>Werks}"/>
                                         <Text id="idTextLgort" text="{MStockSet>Lgort}"/>
                                         <Text id="idTextLgpla" text="{MStockSet>Lgpla}"/>
-                                        <Text id="idTextLabst" text="{path: 'MStockSet>Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
-                                        <Text id="idTextResqu" text="{path: 'MStockSet>Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
-                                        <Text id="idTextEisbe" text="{MStockSet>Eisbe}"/>
+                                        <Text id="idTextLabst" class="csTxt" text="{path: 'MStockSet>Labst', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}" />
+                                        <Text id="idTextResqu" class="csTxt" text="{path: 'MStockSet>Resqu', type: 'sap.ui.model.odata.type.Decimal', constraints: {scale: 0}}"/>
+                                        <Text id="idTextEisbe" class="csTxt" text="{MStockSet>Eisbe}"/>
                                         
-                                        <VBox id="idVBoxChart">
-                                        <ObjectStatus id="idRadialChart" 
-                                                    class="csCardTitle"
+                                        <VBox id="idVBoxChart" class="csBox">
+                                            <ObjectStatus id="idRadialChart" 
+                                                    class="csRateText"
                                                     text="{= Math.round((Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100) &gt; 100 ? '100 %' : Math.round((Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100) + ' %' }"
                                                     state="{= (Number(${MStockSet>Labst}) / Number(${MStockSet>Actin})) * 100 &gt;= 80 ? 'Error' : 'Success' }"/>
                                         <!-- <micro:RadialMicroChart id="idRadialChart" 
@@ -162,9 +166,9 @@
                                                                     valueColor="{= ( Number(${MStockSet>Labst}) / Number(${MStockSet>Actin}) ) * 100 >= 80 ? 'Error' : 'Good' }"/> 창고의 점유율이 80% 넘으면 경고의 의미로 빨간색으로 표현 -->
                                         </VBox>
 
-                                        <VBox id="idVBoxChart02">
-                                        <ObjectStatus id="idRadialChart02" 
-                                                    class="csCardTitle"
+                                        <VBox id="idVBoxChart02" class="csBox">
+                                            <ObjectStatus id="idRadialChart02" 
+                                                    class="csRateText"
                                                     text="{= Math.round(((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100) &gt; 100 ? '100 %' : Math.round(((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin})) * 100) + ' %' }"
                                                     state="{= ((Number(${MStockSet>Labst}) + Number(${MStockSet>Resqu})) / Number(${MStockSet>Actin}) ) * 100 >= 20 ? 'Success' : 'Error' }"/>
 
