@@ -1,1 +1,48 @@
-/* Enter your custom styles here */
+.csToolbar {
+    /* UI5 css 우선 순위가 더 높기 때문에 커스텀 css 입히기 위해 !important 사용 */
+    height: auto !important;
+    padding-top: 13px !important;
+    padding-bottom: 13px !important;
+
+}
+
+.csCardTitle {
+    font-size: 0.9rem !important;
+    font-weight: bold;
+    margin: 0 !important;
+}
+
+.csTileText {
+    font-size: 2.3rem !important;
+    font-weight: bold !important;
+}
+
+.csUnitText {
+    font-size: 0.9rem !important; 
+    padding-bottom: 0.3rem !important;
+    margin-left: 5px;
+    /* font-weight: bold; */
+}
+
+.csColor01 {
+    color: #FFE2F2 !important;
+}
+
+.tileLayout {
+    border: none !important;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    height: 140px !important;
+    min-height: unset !important;
+    overflow: visible !important;
+}
+
+.tileLayout .sapMGTContent {
+    height: auto !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* .tileLayout:hover {
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.12) !important;
+    transition: box-shadow 0.2s ease-in-out;
+} */

@@ -1,0 +1,17 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <SelectDialog
+        id="idCommonHelpDialog"
+        rememberSelections="false"
+        search=".onSearchValueHelp"
+        confirm=".onConfirmCommonPopup"
+        showClearButton="true"
+    >
+        <StandardListItem
+            id="idCommonHelpItem"
+            type="Active"
+        />
+    </SelectDialog>
+</core:FragmentDefinition>

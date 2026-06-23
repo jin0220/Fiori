@@ -19,6 +19,10 @@ server:
           - path: /sap
             url: http://bgissap1.bgissap.co.kr:8000
             client: '100'
+          - path: /sap/opu/odata/sap/ZMMSH_SRV_B20/
+            url: http://bgissap1.bgissap.co.kr:8000/
+            client: '100'
+            authenticationType: basic
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

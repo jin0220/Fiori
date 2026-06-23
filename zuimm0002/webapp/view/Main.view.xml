@@ -7,17 +7,9 @@
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:core="sap.ui.core"
+    xmlns:tnt="sap.tnt"
     xmlns="sap.m">
     <f:DynamicPage id="page" headerExpanded="true">
-        
-        <f:title>
-            <f:DynamicPageTitle id="pageTitle">
-                <f:heading>
-                    <Title id="mainTitle" text="구매진행 현황 트래킹"/>
-                </f:heading>
-            </f:DynamicPageTitle>
-        </f:title>
-        
         <f:header>
             <f:DynamicPageHeader id="pageHeader">
                 <fb:FilterBar id="filterbar" persistencyKey="myPersKey" useToolbar="false" search=".onSearch" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
@@ -34,17 +26,17 @@
                                     id="idMatnr" 
                                     placeholder="자재코드 또는 자재명 입력..."
                                     showValueHelp="true" 
-                                    valueHelpRequest=".onValueHelpMatnr"
+                                    valueHelpRequest=".onValueHelpRequest"
                                     showSuggestion="true"
                                     suggest=".onSuggestMatnr"
-                                    suggestionItems="{MaterialSet>/}"
+                                    suggestionItems="{MaterialHelp>/}"
                                     filterSuggests="false">
                                     <suggestionItems>
                                         <core:ListItem 
                                             id="idMatnrCom" 
-                                            key="{MaterialSet>Matnr}" 
-                                            text="{MaterialSet>Matnr}" 
-                                            additionalText="{MaterialSet>Maktx}" />
+                                            key="{MaterialHelp>Matnr}" 
+                                            text="{MaterialHelp>Matnr}" 
+                                            additionalText="{MaterialHelp>Maktx}" />
                                     </suggestionItems>
                                 </Input>
                             </fb:control>
@@ -58,7 +50,7 @@
 
                         <fb:FilterGroupItem id="filterGroupLgort" groupName="G1" name="Lgort" label="창고" visibleInFilterBar="true">
                             <fb:control>
-                                <Input id="idLgort" showValueHelp="true" valueHelpRequest=".onValueHelpRequestLgort" />
+                                <Input id="idLgort" showValueHelp="true" valueHelpRequest=".onValueHelpRequest" />
                             </fb:control>
                         </fb:FilterGroupItem>
                     </fb:filterGroupItems>
@@ -68,34 +60,84 @@
 
         <f:content>
             <VBox id="idContentWrapper">
-                <Table id="idStockTable" items="{PRSet>/}" itemPress=".onItemSelect">
-                    <columns>
-                        <Column id="colBanfn"><Text id="txtColBanfn" text="구매요청번호"/></Column>
-                        <Column id="colBnfpo"><Text id="txtColBnfpo" text="항목번호"/></Column>
-                        <Column id="colWerks"><Text id="txtColWerks" text="플랜트"/></Column>
-                        <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
-                        <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
-                        <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
-                        <!-- <Column id="colStatu"><Text id="txtColStatu" text="승인상태"/></Column> -->
-                        <!-- <Column id="colEbeln"><Text id="txtColEbeln" text="구매오더번호"/></Column> -->
-                        <!-- <Column id="colBadat"><Text id="txtColBadat" text="요청일자"/></Column> -->
-                        <!-- <Column id="colLfdat"><Text id="txtColLfdat" text="납기요청일"/></Column> -->
-                    </columns>
-                    
-                    <items>
-                        <ColumnListItem id="idRowItem" type="Active">
-                            <cells>
-                                <Text id="idTextBanfn" text="{PRSet>Banfn}"/>
-                                <Text id="idTextBnfpo" text="{PRSet>Bnfpo}"/>
-                                <Text id="idTextWerks" text="{PRSet>Werks}"/>
-                                <Text id="idTextLgort" text="{PRSet>Lgort}"/>
-                                <Text id="idTextMatnr" text="{PRSet>Matnr}"/>
-                                <Text id="idTextMaktx" text="{PRSet>Maktx}" />
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
-                
+                <HBox width="100%" renderType="Bare">
+                    <GenericTile id="idBeforeTile" width="24%" class="sapUiTinyMarginTop tileLayout" header="진행 전" press=".onPress">
+                        <TileContent>
+                            <HBox alignItems="End">
+                                <Text text="{StatusCnt>/before}" class="sapUiGridLabel csTileText" />
+                                <Text text=" 건" class="csUnitText" />
+                            </HBox>
+                        </TileContent>
+                    </GenericTile>
+
+                    <GenericTile id="idOngoingTile" width="24%" class="sapUiSmallMarginBegin sapUiTinyMarginTop tileLayout" header="진행 중" press=".onPress">
+                        <TileContent>
+                            <HBox alignItems="End">
+                                <Text text="{StatusCnt>/ongoing}" class="sapUiGridLabel csTileText" />
+                                <Text text=" 건" class="csUnitText" />
+                            </HBox>
+                        </TileContent>
+                    </GenericTile>
+
+                    <GenericTile id="idCompleteTile" width="24%" class="sapUiSmallMarginBegin sapUiTinyMarginTop tileLayout" header="진행 완료" press=".onPress">
+                        <TileContent>
+                            <HBox alignItems="End">
+                                <Text text="{StatusCnt>/complete}" class="sapUiGridLabel csTileText" />
+                                <Text text=" 건" class="csUnitText" />
+                            </HBox>
+                        </TileContent>
+                    </GenericTile>
+
+                    <GenericTile id="idRejectTile" width="24%" class="sapUiSmallMarginBegin sapUiTinyMarginTop tileLayout" header="반려" press=".onPress">
+                        <TileContent>
+                            <HBox alignItems="End">
+                                <Text text="{StatusCnt>/reject}" class="sapUiGridLabel csTileText" />
+                                <Text text=" 건" class="csUnitText" />
+                            </HBox>
+                        </TileContent>
+                    </GenericTile>
+                </HBox>
+                <Panel id="idTablePanel" width="100%" class="sapUiNoContentPadding sapUiCurrentWindowWidth sapUiMediumMarginTop sapUiSmallMarginBottom" accessibleRole="Region">
+                    <headerToolbar>
+                        <OverflowToolbar class="csToolbar">
+                            <Title class="csCardTitle" text="재고 목록"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <content>
+                        <Table id="idStockTable" items="{PRSet>/}" itemPress=".onItemSelect">
+                            <columns>
+                                <Column id="colBanfn"><Text id="txtColBanfn" text="구매요청번호"/></Column>
+                                <Column id="colBnfpo"><Text id="txtColBnfpo" text="항목번호"/></Column>
+                                <Column id="colWerks"><Text id="txtColWerks" text="플랜트"/></Column>
+                                <Column id="colLgort"><Text id="txtColLgort" text="창고"/></Column>
+                                <Column id="colMatnr"><Text id="txtColMatnr" text="자재코드"/></Column>
+                                <Column id="colMaktx"><Text id="txtColMaktx" text="자재명"/></Column>
+                                <Column id="colStatu"><Text id="txtColStatu" text="진행상태"/></Column>
+                            </columns>
+                            
+                            <items>
+                                <ColumnListItem id="idRowItem" type="Active">
+                                    <cells>
+                                        <Text id="idTextBanfn" text="{PRSet>Banfn}"/>
+                                        <Text id="idTextBnfpo" text="{PRSet>Bnfpo}"/>
+                                        <Text id="idTextWerks" text="{PRSet>Werks}"/>
+                                        <Text id="idTextLgort" text="{PRSet>Lgort}"/>
+                                        <Text id="idTextMatnr" text="{PRSet>Matnr}"/>
+                                        <Text id="idTextMaktx" text="{PRSet>Maktx}"/>
+                                        <tnt:InfoLabel
+                                            text="{PRSet>StatusText}"
+                                            renderMode="Narrow"
+                                            colorScheme= "{
+                                                path: 'PRSet>StatusText',
+                                                formatter: '.availableState'
+                                            }" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </content>
+                </Panel>
             </VBox>
         </f:content>
         

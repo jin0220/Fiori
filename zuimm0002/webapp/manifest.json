@@ -24,6 +24,15 @@
           "localUri": "localService/mainService/metadata.xml",
           "odataVersion": "2.0"
         }
+      },
+      "ZMMSH_SRV_B20": {
+        "uri": "/sap/opu/odata/sap/ZMMSH_SRV_B20/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/ZMMSH_SRV_B20/metadata.xml",
+          "odataVersion": "2.0"
+        }
       }
     }
   },
@@ -45,6 +54,9 @@
   },
   "sap.ui5": {
     "flexEnabled": false,
+    "config": {
+      "fullWidth": true
+    },
     "dependencies": {
       "minUI5Version": "1.120.0",
       "libs": {
@@ -65,6 +77,11 @@
       },
       "": {
         "dataSource": "mainService",
+        "preload": true,
+        "settings": {}
+      },
+      "ZMMSH_SRV_B20": {
+        "dataSource": "ZMMSH_SRV_B20",
         "preload": true,
         "settings": {}
       }

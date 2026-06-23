@@ -19,6 +19,10 @@ server:
           - path: /sap
             url: http://bgissap1.bgissap.co.kr:8000
             client: '100'
+          - path: /sap/opu/odata/sap/ZMMSH_SRV_B20/
+            url: http://bgissap1.bgissap.co.kr:8000/
+            client: '100'
+            authenticationType: basic
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -38,5 +42,9 @@ server:
           - urlPath: /sap/opu/odata/sap/ZGWB2MM0003_SRV
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/ZMMSH_SRV_B20
+            metadataPath: ./webapp/localService/ZMMSH_SRV_B20/metadata.xml
+            mockdataPath: ./webapp/localService/ZMMSH_SRV_B20/data
             generateMockData: true
         annotations: []
