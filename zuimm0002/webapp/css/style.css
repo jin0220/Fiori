@@ -18,7 +18,7 @@
 }
 
 .csUnitText {
-    font-size: 0.9rem !important; 
+    font-size: 0.9rem !important;
     padding-bottom: 0.3rem !important;
     margin-left: 5px;
     /* font-weight: bold; */
@@ -42,7 +42,13 @@
     padding-bottom: 0.5rem !important;
 }
 
-/* .tileLayout:hover {
-    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.12) !important;
-    transition: box-shadow 0.2s ease-in-out;
-} */
+.csHeaderTitle {
+    font-size: 1.3rem !important;
+    font-weight: bold !important;
+}
+
+.csProcessFlow {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: center !important;
+}

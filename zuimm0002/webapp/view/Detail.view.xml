@@ -2,52 +2,122 @@
     controllerName="zuimm0002.controller.Detail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:layout="sap.ui.layout"
     xmlns:suite="sap.suite.ui.commons">
     
-    <Page id="_IDGenPage" title="구매 진행 프로세스 실시간 추적" class="sapUiContentPadding">
-        <content>
-            
-            <Panel id="_IDGenPanel" 
-                   width="auto" 
-                   class="sapUiResponsiveMargin sapUiCard sapUiResponsiveContentPadding">
-                   <headerToolbar>
-                        <Toolbar id="_IDGenToolbar">
-                            <Title id="panelTitle" text="자재 정보 로딩 중..." level="H2" />
+    <f:DynamicPage id="pageDetail" headerExpanded="true" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle id="pageTitle">
+                <f:heading>
+                    <Title id="mainTitle" class="csHeaderTitle" text="구매진행 현황 상세"/>
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:header>
+            <f:DynamicPageHeader id="pageDetailHeader" pinnable="false">
+                <layout:HorizontalLayout id="_IDGenHorizontalLayout" allowWrapping="true">
+                    <layout:VerticalLayout id="_IDGenVerticalLayout1" class="sapUiMediumMarginEnd">
+                        <ObjectAttribute title="자재코드/명" text="{headerViewModel>/Matnr} [{headerViewModel>/Maktx}]"/>
+                        <ObjectAttribute title="플랜트 / 창고" text="{headerViewModel>/Werks} / {headerViewModel>/Lgort}"/>
+                    </layout:VerticalLayout>
+
+                    <layout:VerticalLayout id="_IDGenVerticalLayout2" class="sapUiMediumMarginEnd">
+                        <ObjectAttribute title="요청수량" text="{headerViewModel>/Menge} {headerViewModel>/Meins}"/>
+                        <ObjectStatus title="최종 진행상태" text="{headerViewModel>/StatusText}" state="None"/>
+                    </layout:VerticalLayout>
+                </layout:HorizontalLayout>
+            </f:DynamicPageHeader>
+        </f:header>
+        <f:content>
+            <VBox id="idContentWrapperDetail">
+                <Panel id="_IDGenPanel" 
+                    width="100%" 
+                    class="sapUiCard sapUiResponsiveContentPadding">
+                    <headerToolbar>
+                        <Toolbar class="csToolbar">
+                            <Title id="panelTitle" class="csCardTitle" text="자재 정보 로딩 중..." />
                         </Toolbar>
                     </headerToolbar>
-                <content>
-                    
-                    <VBox id="_IDGenVBox" class="sapUiLargeMarginBegin">
 
-                        <suite:ProcessFlow id="idPurchasingProcessFlow" 
-                                            wheelZoomable="false"
-                                            nodes="{ProcessModel>/nodes}"
-                                            lanes="{ProcessModel>/lanes}"
-                                            nodePress=".onNodePress">
-                            <suite:nodes>
-                                <suite:ProcessFlowNode id="_IDGenProcessFlowNode"
-                                    nodeId="{ProcessModel>id}"
-                                    laneId="{ProcessModel>lane}"
-                                    title="{ProcessModel>title}"
-                                    titleAbbreviation="{ProcessModel>titleAbbr}"
-                                    children="{ProcessModel>children}"
-                                    state="{ProcessModel>state}"
-                                    texts="{ProcessModel>texts}" />
-                            </suite:nodes>
-                            <suite:lanes>
-                                <suite:ProcessFlowLaneHeader id="_IDGenProcessFlowLaneHeader"
-                                    laneId="{ProcessModel>id}"
-                                    iconSrc="{ProcessModel>icon}"
-                                    text="{ProcessModel>text}"
-                                    position="{ProcessModel>position}" />
-                            </suite:lanes>
-                        </suite:ProcessFlow>
+                    <content>
+                        <VBox id="_IDGenVBox">
+                            <suite:ProcessFlow id="idPurchasingProcessFlow" 
+                                                class="csProcessFlow"
+                                                wheelZoomable="false"
+                                                nodes="{ProcessModel>/nodes}"
+                                                lanes="{ProcessModel>/lanes}"
+                                                nodePress=".onNodePress">
+                                <suite:nodes>
+                                    <suite:ProcessFlowNode id="_IDGenProcessFlowNode"
+                                        nodeId="{ProcessModel>id}"
+                                        laneId="{ProcessModel>lane}"
+                                        title="{ProcessModel>title}"
+                                        titleAbbreviation="{ProcessModel>titleAbbr}"
+                                        children="{ProcessModel>children}"
+                                        state="{ProcessModel>state}"
+                                        texts="{ProcessModel>texts}" />
+                                </suite:nodes>
+                                <suite:lanes>
+                                    <suite:ProcessFlowLaneHeader id="_IDGenProcessFlowLaneHeader"
+                                        laneId="{ProcessModel>id}"
+                                        iconSrc="{ProcessModel>icon}"
+                                        text="{ProcessModel>text}"
+                                        position="{ProcessModel>position}" />
+                                </suite:lanes>
+                            </suite:ProcessFlow>
+                        </VBox>
+                    </content>
+                </Panel>
+                <Panel id="_IDGenPanel02" 
+                    width="100%" 
+                    class="sapUiCard sapUiResponsiveContentPadding sapUiSmallMarginTop sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <Toolbar class="csToolbar">
+                            <Title id="panelTitle02" class="csCardTitle" text="타임라인" />
+                        </Toolbar>
+                    </headerToolbar>
 
-                    </VBox>
-                    
-                </content>
-            </Panel>
-            
-        </content>
-    </Page>
+                    <content>
+                        <VBox id="_IDGenVBox02">
+                            <Table id="idHistoryTable"
+                                items="{timelineModel>/}"
+                                noDataText="진행 이력이 존재하지 않습니다.">
+                                
+                                <columns>
+                                    <Column width="25%" id="_IDGenColumn1">
+                                        <Text text="처리 일시" id="_IDGenTextC1"/>
+                                    </Column>
+                                    <Column width="20%" id="_IDGenColumn2">
+                                        <Text text="진행 단계" id="_IDGenTextC2"/>
+                                    </Column>
+                                    <Column width="20%" id="_IDGenColumn3">
+                                        <Text text="처리자" id="_IDGenTextC3"/>
+                                    </Column>
+                                    <Column width="35%" id="_IDGenColumn4">
+                                        <Text text="비고 / 코멘트" id="_IDGenTextC4"/>
+                                    </Column>
+                                </columns>
+                                
+                                <items>
+                                    <ColumnListItem id="_IDGenColumnListItem">
+                                        <cells>
+                                            <Text text="{path: 'timelineModel>dateTime', formatter: '.formatDate'}" id="_IDGenText1"/>
+                                            
+                                            <ObjectStatus text="{timelineModel>statusTitle}" 
+                                                        state="{timelineModel>timelineState}" id="_IDGenStatus2"/>
+                                            
+                                            <Text text="{timelineModel>userName}" id="_IDGenText3"/>
+                                            
+                                            <Text text="{timelineModel>comment}" id="_IDGenText4"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                    </content>
+                </Panel>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>

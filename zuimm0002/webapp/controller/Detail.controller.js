@@ -16,6 +16,13 @@ sap.ui.define([
 
             var oQuickViewModel = new JSONModel({});
             this.getView().setModel(oQuickViewModel, "quickViewModel");
+
+            var oHeaderViewModel = new JSONModel({});
+            this.getView().setModel(oHeaderViewModel, "headerViewModel");
+
+            var oTimelineViewModel = new JSONModel({});
+            this.getView().setModel(oTimelineViewModel, "timelineModel");
+
         },
 
         _onObjectMatched(oEvent) {
@@ -27,6 +34,37 @@ sap.ui.define([
 
             // 🌟 2. 껍데기만 있던 화면에 데이터를 주입하는 함수를 드디어 호출합니다!
             this._renderProcessFlow(sBanfn, sBnfpo);
+        },
+
+        formatDate: function (vDate) {
+            if (!vDate) { return "-"; }
+
+            // 1. Date 객체 형태로 넘어왔다면 포맷 가공
+            if (vDate instanceof Date) {
+                var yyyy = vDate.getFullYear();
+                var mm = String(vDate.getMonth() + 1).padStart(2, '0');
+                var dd = String(vDate.getDate()).padStart(2, '0');
+                return yyyy + "-" + mm + "-" + dd;
+            }
+
+            // 2. 💡 [수정] OData 타임스탬프 형식 (/Date(1719219600000+0900)/) 안전하게 파싱
+            if (typeof vDate === "string" && vDate.includes("Date")) {
+                // "+", "-" 기호 앞까지만 숫자열을 잘라내서 시차 데이터(+0900)와의 결합을 방지합니다.
+                var sPureTimestamp = vDate.replace("/Date(", "").replace(")/", "").split(/[+-]/)[0];
+                var oDate = new Date(parseInt(sPureTimestamp, 10));
+
+                var yyyy = oDate.getFullYear();
+                var mm = String(oDate.getMonth() + 1).padStart(2, '0');
+                var dd = String(oDate.getDate()).padStart(2, '0');
+                return yyyy + "-" + mm + "-" + dd;
+            }
+
+            // 3. 백엔드에서 20260528 문자열 형태로 줄 때 처리
+            if (typeof vDate === "string" && vDate.length === 8 && !vDate.includes("-")) {
+                return vDate.substring(0, 4) + "-" + vDate.substring(4, 6) + "-" + vDate.substring(6, 8);
+            }
+
+            return vDate;
         },
 
         _renderProcessFlow(sBanfn, sBnfpo) {
@@ -46,7 +84,8 @@ sap.ui.define([
                     "$expand": "POSet/GRSet/IVSet"
                 },
                 success: function (oData) {
-                    this.byId("panelTitle").setText(oData.Matnr + " [" + oData.Maktx + "]");
+                    console.log(oData);
+                    this.byId("panelTitle").setText("진행 현황");
 
                     let POSet = (oData.POSet && oData.POSet.results && oData.POSet.results[0]) || null;
                     let GRSet = (POSet && POSet.GRSet && POSet.GRSet.results && POSet.GRSet.results[0]) || null;
@@ -54,12 +93,53 @@ sap.ui.define([
 
                     this._oRawDetailData = oData;
 
+                    // 헤더 데이터 세팅
+                    this.getView().getModel("headerViewModel").setData({
+                        Matnr: oData.Matnr,
+                        Maktx: oData.Maktx,
+                        Werks: oData.Werks,
+                        Lgort: oData.Lgort,
+                        Menge: oData.Menge,
+                        Meins: oData.Meins,
+                        StatusText: oData.StatusText
+                    });
+
                     // --- 1단계: PR 상태 제어 (항상 존재함) ---
                     let sStatus = "Neutral";
                     let sText = "대기";
                     if (oData.Statu === 'A' || oData.Statu === 'C') { sStatus = "Positive"; sText = "승인"; }
                     else if (oData.Statu === 'W') { sStatus = "Critical"; sText = "결재 대기"; }
                     else if (oData.Statu === 'R') { sStatus = "Negative"; sText = "반려"; }
+
+                    let aTimelineData = [];
+
+                    // PR 생성 이력
+                    aTimelineData.push({
+                        dateTime: oData.Erdat, // 구매요청일
+                        statusTitle: "구매요청(PR) 생성 완료",
+                        userName: oData.Ernam,
+                        timelineState: "Information",
+                        comment: "구매요청 번호: " + oData.Banfn + " / 품목: " + oData.Bnfpo
+                    });
+
+                    // PR 승인 이력
+                    if (oData.Statu === 'A' || oData.Statu === 'C') {
+                        aTimelineData.push({
+                            dateTime: oData.Badat, // 승인 시간 대안으로 세팅
+                            statusTitle: "구매요청(PR) 최종 승인",
+                            userName: oData.Aenam,
+                            timelineState: "Success",
+                            comment: "구매요청 전표 최종 승인 처리 완료"
+                        });
+                    } else if (oData.Statu === 'R') {
+                        aTimelineData.push({
+                            dateTime: oData.Badat, // 승인 시간 대안으로 세팅
+                            statusTitle: "구매요청(PR) 반려",
+                            userName: oData.Aenam,
+                            timelineState: "Error",
+                            comment: oData.ZrejectReason
+                        });
+                    }
 
                     // --- 2단계: PO 상태 제어 (POSet 존재 여부 체크) ---
                     let pStatus = "Neutral";
@@ -77,6 +157,15 @@ sap.ui.define([
                             pStatus = "Critical";
                             pText = "발주 대기";
                         }
+
+                        // PO 발행 이력 추가
+                        aTimelineData.push({
+                            dateTime: POSet.Erdat,
+                            statusTitle: "구매오더(PO) 발행 완료",
+                            userName: POSet.Ernam,
+                            timelineState: "Information",
+                            comment: "공급업체: " + pVendor + " (오더 번호: " + POSet.Ebeln + ")"
+                        });
                     }
 
                     // --- 3단계: GR 상태 제어 (GRSet 및 부모인 POSet 존재 여부 체크) ---
@@ -93,6 +182,15 @@ sap.ui.define([
                             gStatus = "Critical";
                             gText = "입고 대기";
                         }
+
+                        // GR 입고 이력 추가
+                        aTimelineData.push({
+                            dateTime: GRSet.Erdat,
+                            statusTitle: "자재 입고(GR) 완료",
+                            userName: GRSet.Ernam,
+                            timelineState: "Success",
+                            comment: "자재문서 번호: " + GRSet.Mblnr + " / 입고수량: " + GRSet.Menge
+                        });
                     }
 
                     // --- 4단계: IV 상태 제어 (IVSet 존재 여부 체크) ---
@@ -101,7 +199,7 @@ sap.ui.define([
                     let iTitle = "IV 대기";
 
                     if (IVSet && POSet) {
-                        iTitle = IVSet.Mblnr;
+                        iTitle = IVSet.Belnr;
                         if (IVSet.Statu === 'K') {
                             iStatus = "Positive";
                             iText = "송장 정산 마감";
@@ -109,7 +207,20 @@ sap.ui.define([
                             iStatus = "Critical";
                             iText = "송장 정산 대기";
                         }
+
+                        // IV 송장 검증 이력 추가
+                        aTimelineData.push({
+                            dateTime: IVSet.Erdat,
+                            statusTitle: "송장 검증(IV) 마감",
+                            userName: IVSet.Ernam,
+                            timelineState: "Success",
+                            comment: "송장 전표 번호: " + IVSet.Belnr
+                        });
                     }
+
+                    // 타입라인 테이블 데이터 바인딩
+                    this.getView().getModel("timelineModel").setData(aTimelineData);
+
                     aNodes.push({
                         id: "1",
                         lane: "lanePR",
@@ -280,7 +391,7 @@ sap.ui.define([
                     }
 
                 } else if (sLane === "laneIV") {
-                    oDisplayData.isIV = true; 
+                    oDisplayData.isIV = true;
                     var oIVData = (oGRData && oGRData.IVSet && oGRData.IVSet.results && oGRData.IVSet.results[0]) || null;
                     console.log(oIVData);
                     if (oIVData && oPOData) {

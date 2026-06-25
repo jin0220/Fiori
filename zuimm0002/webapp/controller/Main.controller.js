@@ -21,6 +21,7 @@ sap.ui.define([
             this._oModel.read("/PRSet", {
                 success: function (oData) {
                     oJSONModelMain.setData(oData.results);
+                    console.log(oData.results);
 
                     oCntModel.setData({
                         before: oData.results.filter(item => item.StatusText === "진행 전").length,
@@ -42,7 +43,7 @@ sap.ui.define([
             
             this._oMetModel.read("/ZCDS_B2_MM_CR_0018", {
                 success: function (oData) {
-                    oMatHelpModel.setData(oData.results);
+                    oMatHelpModel.setData(oData.results.filter(item => item.Matnr.substring(0, 2) === "RM"));
                 }.bind(this),
                 error: function (oError) {
                     console.error("데이터 조회 실패: ", oError);
@@ -314,9 +315,56 @@ sap.ui.define([
             }
             console.log(oInput);
             console.log(oBinding);
-        }
+        },
         //=============================================================================
         // 검색 로직
         //=============================================================================
+        onSearch: function () {
+            var oBanfnInput = this.byId("idBanfn");
+            var oMatnrInput = this.byId("idMatnr");
+            var oWerksInput = this.byId("idWerks");
+            var oLgortInput = this.byId("idLgort");
+
+            // 사용자가 입력한 값(Value) 추출하기
+            var sBanfn = oBanfnInput ? oBanfnInput.getValue().trim() : "";
+            var sMatnr = oMatnrInput ? oMatnrInput.getValue().trim() : "";
+            var sWerks = oWerksInput ? oWerksInput.getValue().trim() : "";
+            var sLgort = oLgortInput ? oLgortInput.getValue().trim() : "";
+
+            var aFilters = [];
+
+            // 구매요청번호가 입력되었다면 필터 추가 
+            if (sBanfn) {
+                aFilters.push(new Filter("Banfn", FilterOperator.EQ, sBanfn));
+            }
+
+            // 자재코드가 입력되었다면 필터 추가 
+            if (sMatnr) {
+                aFilters.push(new Filter("Matnr", FilterOperator.EQ, sMatnr));
+            }
+
+            // 플랜트가 입력되었다면 필터 추가
+            if (sWerks) {
+                aFilters.push(new Filter("Werks", FilterOperator.EQ, sWerks));
+            }
+
+            // 창고가 입력되었다면 필터 추가
+            if (sLgort) {
+                aFilters.push(new Filter("Lgort", FilterOperator.EQ, sLgort));
+            }
+
+            var oTable = this.byId("idStockTable");
+            if (oTable) {
+                var oBinding = oTable.getBinding("items");
+
+                if (oBinding) {
+                    oBinding.filter(aFilters);
+                } else {
+                    console.error("테이블 바인딩 객체를 찾을 수 없습니다.");
+                }
+            } else {
+                console.error("메인 테이블 컨트롤을 찾을 수 없습니다. ID를 확인해 주세요.");
+            }
+        }
     });
 });
