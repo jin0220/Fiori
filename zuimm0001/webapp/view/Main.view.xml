@@ -120,7 +120,7 @@
                     </content>
                 </Panel>
 
-                <Panel id="idTablePanel" width="100%" class="sapUiNoContentPadding sapUiCurrentWindowWidth sapUiMediumMarginTop" accessibleRole="Region">
+                <Panel id="idTablePanel" width="100%" class="sapUiNoContentPadding sapUiCurrentWindowWidth sapUiMediumMarginTop sapUiSmallMarginBottom" accessibleRole="Region">
                     <headerToolbar>
                         <OverflowToolbar class="csToolbar">
                             <Title class="csCardTitle" text="재고 목록"/>
