@@ -35,6 +35,8 @@ sap.ui.define([
 
     return Controller.extend("zuimm0003.controller.Main", {
         onInit: function () {
+            this._oModel = this.getOwnerComponent().getModel();
+
             this.getView().setModel(new JSONModel({
                 selectedKey: "ALL",
                 counts: {
@@ -59,121 +61,65 @@ sap.ui.define([
             this._refreshCounts();
         },
 
+        //=============================================================================
+        // 버튼 기능
+        //=============================================================================
         onPressRemind: function (oEvent) {
             this._completeAlert(oEvent.getSource().getBindingContext(), {
                 successMessage: "결재자에게 독촉 알림이 전송되었습니다."
             });
         },
-
-        onPressCreatePR: function (oEvent) {
-            var oButton = oEvent.getSource();
-            var oContext = oButton.getBindingContext();
-            var oAlert = oContext.getObject();
-            var sQuantity = this._getDeficitText(oAlert);
-            var oDialog = new Dialog({
-                title: "즉시 PR 생성",
-                contentWidth: "28rem",
-                draggable: true,
-                resizable: true,
-                content: new VBox({
-                    class: "zuimmActionDialog",
-                    items: [
-                        new Text({
-                            text: "안전재고 부족분을 기준으로 구매요청을 생성합니다."
-                        }),
-                        this._createDialogRow("알림 번호", oAlert.AlertId || "-"),
-                        this._createDialogRow("참조 문서", oAlert.RefDoc || "-"),
-                        this._createDialogRow("부족 수량", sQuantity)
-                    ]
-                }),
-                beginButton: new Button({
-                    text: "승인",
-                    type: "Accept",
-                    icon: "sap-icon://accept",
-                    press: function () {
-                        oDialog.setBusy(true);
-                        this._completeAlert(oContext, {
-                            successMessage: "구매요청이 생성되었습니다.",
-                            success: function () {
-                                oDialog.close();
-                            },
-                            error: function () {
-                                oDialog.setBusy(false);
-                            }
-                        });
-                    }.bind(this)
-                }),
-                endButton: new Button({
-                    text: "취소",
-                    press: function () {
-                        oDialog.close();
-                    }
-                }),
-                afterClose: function () {
-                    oDialog.destroy();
-                }
-            });
-
-            this.getView().addDependent(oDialog);
-            oDialog.open();
-        },
-
         onPressViewContact: function (oEvent) {
             var oButton = oEvent.getSource();
-            var oContext = oButton.getBindingContext();
-            var oAlert = oContext.getObject();
-            var oPopover = new Popover({
-                title: "업체 연락처",
-                placement: "Auto",
-                contentWidth: "22rem",
-                content: new VBox({
-                    class: "zuimmContactCard",
-                    items: [
-                        new ObjectStatus({
-                            title: "납품 지연",
-                            text: oAlert.RefDoc || "-",
-                            state: "Information",
-                            icon: "sap-icon://shipping-status"
-                        }),
-                        this._createContactLine("담당자", "김민준 구매 담당"),
-                        this._createContactLine("전화", "02-1234-5678"),
-                        this._createContactLine("이메일", "vendor.contact@example.com")
-                    ]
-                }),
-                footer: new HBox({
-                    width: "100%",
-                    justifyContent: "End",
-                    class: "zuimmPopoverFooter",
-                    items: [
-                        new Button({
-                            text: "처리 완료",
-                            type: "Emphasized",
-                            icon: "sap-icon://complete",
-                            press: function () {
-                                this._completeAlert(oContext, {
-                                    successMessage: "PO 납품 지연 알림이 처리되었습니다.",
-                                    success: function () {
-                                        oPopover.close();
-                                    }
-                                });
-                            }.bind(this)
-                        })
-                    ]
-                }),
-                afterClose: function () {
-                    oPopover.destroy();
-                }
+            var oView = this.getView();
+
+            if (!this._pPopover) {
+                this._pPopover = this.loadFragment({
+                    name: "zuimm0003.view.fragments.ContactPopover"
+                }).then(function (oPopover) {
+                    oView.addDependent(oPopover);
+                    return oPopover;
+                });
+            }
+
+            this._pPopover.then(function (oPopover) {
+                // 클릭한 버튼의 데이터 컨텍스트를 팝업에 공유
+                oPopover.setBindingContext(oButton.getBindingContext());
+                // 버튼 위치를 기준으로 팝업 오픈
+                oPopover.openBy(oButton);
             });
 
-            this.getView().addDependent(oPopover);
-            oPopover.openBy(oButton);
+            this._oModel.read("/VendorSet('" + oButton.getBindingContext().getObject().RefDoc + "')", {
+                success: function (oData) {
+                    this.getView().setModel(new JSONModel(oData), "vendor");
+                }.bind(this),
+                error: function (oError) {
+                    console.log("oData 요청 실패", oError);
+                }.bind(this)
+            });
+        },
+        onPressNoRemind: function (oEvent) {
+            var sPath = oEvent.getSource().getBindingContext().getPath();
+
+            // this._oModel.setUseBatch(false);
+
+            this._oModel.update(sPath, {
+                ZaStatus: "Y"
+            }, {
+                success: function () {
+                    MessageToast.show("알림이 처리되었습니다.");
+                    this._refreshList();
+                    this._refreshCounts();
+                }.bind(this),
+                error: function (oError) {
+                    MessageBox.error(oError);
+                }
+            });
         },
 
         _applyListFilter: function (sKey) {
             var oBinding = this.byId("alertFeedList").getBinding("items");
-            var aFilters = [
-                new Filter("ZaStatus", FilterOperator.EQ, "N")
-            ];
+            var aFilters = [];
 
             // 탭 선택 시 데이터의 실제 필드값(PR, ST, PO) 기준으로 필터링하도록 수정
             if (sKey === "PR") {
@@ -244,49 +190,24 @@ sap.ui.define([
 
         _readCount: function (sProperty, sType) {
             var oModel = this.getOwnerComponent().getModel();
-            var aFilters = [
-                new Filter("ZaStatus", FilterOperator.EQ, "N")
-            ];
+            var aFilters = [];
 
             if (!oModel) {
                 return;
             }
 
-            aFilters.push(new Filter("AlertType", FilterOperator.EQ, sType));
-            console.log(aFilters);
+            if (sProperty !== "all") {
+                aFilters.push(new Filter("AlertType", FilterOperator.EQ, sType));
+            }
+
             oModel.read("/AlertSet/$count", {
                 filters: aFilters,
                 success: function (sCount) {
-                    console.log(sCount);
                     this.getView().getModel("view").setProperty("/counts/" + sProperty, Number(sCount));
                 }.bind(this),
                 error: function () {
                     this.getView().getModel("view").setProperty("/counts/" + sProperty, 0);
                 }.bind(this)
-            });
-        },
-
-        _createDialogRow: function (sLabel, sValue) {
-            return new HBox({
-                class: "zuimmDialogRow",
-                justifyContent: "SpaceBetween",
-                alignItems: "Center",
-                items: [
-                    new Label({ text: sLabel }),
-                    new Text({ text: sValue })
-                ]
-            });
-        },
-
-        _createContactLine: function (sLabel, sValue) {
-            return new HBox({
-                class: "zuimmContactLine",
-                justifyContent: "SpaceBetween",
-                alignItems: "Center",
-                items: [
-                    new Label({ text: sLabel }),
-                    new Text({ text: sValue })
-                ]
             });
         },
 
@@ -350,29 +271,16 @@ sap.ui.define([
             }
         },
 
-        formatObjectState: function (sType) {
-            switch (this._normalizeType(sType)) {
+        formatCategoryColorScheme: function (sAlertType) {
+            switch (sAlertType) {
                 case "PR":
-                    return "Error";
-                case "STOCK":
-                    return "Warning";
+                    return "Accent3";     // 연한 붉은색 계열 (결재 지연)
+                case "ST":
+                    return "Accent1";  // 연한 주황/옐로우 계열 (재고 부족)
                 case "PO":
-                    return "Information";
+                    return "Accent10";     // 연한 회색/블루 계열 (납품 지연)
                 default:
-                    return "None";
-            }
-        },
-
-        formatStateText: function (sType) {
-            switch (this._normalizeType(sType)) {
-                case "PR":
-                    return "승인 대기";
-                case "STOCK":
-                    return "구매 필요";
-                case "PO":
-                    return "납품 확인";
-                default:
-                    return "신규";
+                    return "Accent6";
             }
         },
 

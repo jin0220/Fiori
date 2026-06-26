@@ -1,0 +1,49 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Popover
+        id="contactPopover"
+        title="업체 연락처"
+        placement="Auto"
+        contentWidth="30rem">
+        <content>
+			<VBox class="sapUiContentPadding zuimmContactCard">
+				<ObjectStatus
+					title="납품 지연"
+					text="{RefDoc}"
+					state="Information"
+					icon="sap-icon://shipping-status"
+					class="sapUiSmallMarginBottom" />
+				<HBox class="zuimmContactLine sapUiTinyMarginBottom" justifyContent="Start" alignItems="Center">
+					<Label text="공급업체코드" width="5rem"/>
+					<Text text="{vendor>/Lifnr}" />
+				</HBox>
+				<HBox class="zuimmContactLine sapUiTinyMarginBottom" justifyContent="Start" alignItems="Center">
+					<Label text="공급업체명" width="5rem"/>
+					<Text text="{vendor>/Name1}" />
+				</HBox>
+				<HBox class="zuimmContactLine sapUiTinyMarginBottom" justifyContent="Start" alignItems="Center">
+					<Label text="전화" width="5rem"/>
+					<Text text="{vendor>/Telf1}" />
+				</HBox>
+				<HBox class="zuimmContactLine" justifyContent="Start" alignItems="Center">
+					<Label text="이메일" width="5rem"/>
+					<Text text="{vendor>/Vmail}" wrapping="true" />
+				</HBox>
+				<HBox class="zuimmContactLine" justifyContent="Start" alignItems="Center">
+					<Label text="주소" width="5rem"/>
+					<Text text="{vendor>/Adrnr}" wrapping="true" />
+				</HBox>
+			</VBox>
+		</content>
+		<footer>
+			<HBox width="100%" justifyContent="End" class="sapUiContentPadding zuimmPopoverFooter">
+				<Button
+					text="처리 완료"
+					type="Emphasized"
+					icon="sap-icon://complete"
+					press=".onPressCompleteAlert" />
+			</HBox>
+		</footer>
+	</Popover>
+</core:FragmentDefinition>

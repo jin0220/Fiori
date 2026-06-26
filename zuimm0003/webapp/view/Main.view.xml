@@ -1,48 +1,56 @@
 <mvc:View
     controllerName="zuimm0003.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page
+    xmlns:f="sap.f"
+    xmlns="sap.m"
+>
+    <f:DynamicPage
         id="page"
-        title="{i18n>title}"
-        class="zuimmNotificationPage">
-        <content>
+        headerExpanded="true"
+    >
+        <f:content>
             <VBox class="zuimmNotificationShell">
                 <IconTabBar
                     id="alertTabBar"
                     expandable="false"
                     selectedKey="{view>/selectedKey}"
-                    select=".onSelectAlertTab">
+                    select=".onSelectAlertTab"
+                    applyContentPadding="false"
+                >
                     <items>
                         <IconTabFilter
                             key="ALL"
                             text="전체 알림"
                             icon="sap-icon://notification-2"
-                            count="{view>/counts/all}" />
+                            count="{view>/counts/all}"
+                        />
                         <IconTabFilter
                             key="PR"
                             text="PR 결재 지연"
                             icon="sap-icon://pending"
                             iconColor="Negative"
-                            count="{view>/counts/pr}" />
+                            count="{view>/counts/pr}"
+                        />
                         <IconTabFilter
                             key="STOCK"
                             text="재고 부족"
                             icon="sap-icon://alert"
                             iconColor="Critical"
-                            count="{view>/counts/stock}" />
+                            count="{view>/counts/stock}"
+                        />
                         <IconTabFilter
                             key="PO"
                             text="PO 납품 지연"
                             icon="sap-icon://shipping-status"
                             iconColor="Neutral"
-                            count="{view>/counts/po}" />
+                            count="{view>/counts/po}"
+                        />
                     </items>
                 </IconTabBar>
 
                 <List
                     id="alertFeedList"
-                    class="zuimmAlertList"
+                    class="zuimmAlertList sapUiNoMarginTop"
                     growing="true"
                     growingThreshold="20"
                     growingScrollToLoad="true"
@@ -62,49 +70,67 @@
                             path: 'Erdat',
                             descending: true
                         }
-                    }">
+                    }"
+                >
                     <CustomListItem type="Inactive">
                         <VBox class="zuimmFeedItem">
-                            <FeedListItem
-                                sender="{path: 'AlertType', formatter: '.formatCategoryText'}"
-                                icon="{path: 'AlertType', formatter: '.formatCategoryIcon'}"
-                                text="{Message}"
-                                timestamp="{parts: [{path: 'Erdat'}, {path: 'Erzet'}], formatter: '.formatTimestamp'}"
-                                info="{parts: [{path: 'RefDoc'}, {path: 'AlertId'}], formatter: '.formatInfo'}" />
+                            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                <Avatar 
+                                    src="{path: 'AlertType', formatter: '.formatCategoryIcon'}"
+                                    displaySize="S"
+                                    displayShape="Circle"
+                                    backgroundColor="{path: 'AlertType', formatter: '.formatCategoryColorScheme'}"
+                                    class="sapUiMediumMarginEnd" 
+                                />
+                                <VBox>
+                                    <HBox alignItems="Center">
+                                        <Text text="{path: 'AlertType', formatter: '.formatCategoryText'}" class="sapUiTinyMarginEnd csText"/>
+                                        <Text text="{Message}" />
+                                    </HBox>
+                                    <Text text="{parts: [{path: 'RefDoc'}, {path: 'AlertId'}], formatter: '.formatInfo'} · {parts: [{path: 'Erdat'}, {path: 'Erzet'}], formatter: '.formatTimestamp'}" 
+                                          class="sapUiTinyMarginTop sapUiGrayText csContentText"/>
+                                </VBox>
+                            </HBox>
 
                             <HBox
                                 class="zuimmQuickActions"
                                 justifyContent="End"
                                 alignItems="Center"
-                                wrap="Wrap">
-                                <ObjectStatus
-                                    class="zuimmAlertState"
-                                    text="{path: 'AlertType', formatter: '.formatStateText'}"
-                                    state="{path: 'AlertType', formatter: '.formatObjectState'}" />
+                                wrap="Wrap"
+                            >
                                 <ToolbarSpacer />
                                 <Button
-                                    text="결재 독촉"
-                                    icon="sap-icon://email"
+                                    text="요청 확인하기"
+                                    icon="sap-icon://journey-depart"
                                     type="Emphasized"
                                     visible="{path: 'AlertType', formatter: '.isPRAlert'}"
-                                    press=".onPressRemind" />
-                                <!-- <Button
-                                    text="즉시 PR 생성"
-                                    icon="sap-icon://create-form"
-                                    type="Accept"
+                                    press=".onPressRemind"
+                                />
+                                <Button
+                                    text="재고 확인하기"
+                                    icon="sap-icon://journey-depart"
+                                    type="Emphasized"
                                     visible="{path: 'AlertType', formatter: '.isStockAlert'}"
-                                    press=".onPressCreatePR" /> -->
+                                    press=".onPressRemind"
+                                />
                                 <Button
                                     text="업체 연락처 보기"
                                     icon="sap-icon://customer"
-                                    type="Default"
+                                    type="Emphasized"
                                     visible="{path: 'AlertType', formatter: '.isPOAlert'}"
-                                    press=".onPressViewContact" />
+                                    press=".onPressViewContact"
+                                />
+                                <Button
+                                    text="다시 보지 않기"
+                                    icon="sap-icon://decline"
+                                    type="Default"
+                                    press=".onPressNoRemind"
+                                />
                             </HBox>
                         </VBox>
                     </CustomListItem>
                 </List>
             </VBox>
-        </content>
-    </Page>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>
